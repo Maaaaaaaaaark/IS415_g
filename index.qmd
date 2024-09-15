@@ -2,8 +2,6 @@
 title: "IS415_g"
 ---
 
-This is a Quarto website.
-
 ```{r}
 1 + 1
 ```
