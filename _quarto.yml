@@ -2,17 +2,45 @@ project:
   type: website
 
 website:
-  title: "IS415_g"
+  title: "IS415-G"
   navbar:
     left:
+      - text: "Hands-on exercise"
+        menu: 
+          - text: "Hands-on Exercise 01"
+            href: "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html"
+          - text: "Hands-on Exercise 02"
+            href: "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html"
+          - text: "Hands-on Exercise 03"
+            href: "Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html"
+          - text: "Hands-on Exercise 04"
+            href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html" 
+          - text: "Hands-on Exercise 05"
+            href: "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.html"
+      - text: "In-class Exercise"
+        menu: 
+          - text: "In-class Exercise 01"
+            href: "In-class_Ex/In-class_Ex01/In-class_Ex01.html"
+          - text: "In-class Exercise 02"
+            href: "In-class_Ex/In-class_Ex02/In-class_Ex02.html" 
+          - text: "In-class Exercise 03"
+            href: "In-class_Ex/In-class_Ex03/In-class_Ex03.html" 
+          - text: "In-class Exercise 04"
+            href: "In-class_Ex/In-class_Ex04/In-class_Ex04.html"
+      - text: "Take-home Exercise"
+        menu: 
+          - text: "Take-home Exercise 01"
+            href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html"
+    right:
       - href: index.qmd
         text: Home
       - about.qmd
+          
 
 format:
   html:
-    theme: cosmo
-    css: styles.css
+    theme: hugo-paper
+    css: bootstrap
     toc: true
 
 editor: visual
