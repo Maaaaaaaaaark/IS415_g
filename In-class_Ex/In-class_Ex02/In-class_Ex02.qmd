@@ -1,0 +1,70 @@
+---
+title: "In-class_Ex02"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "August 26, 2024"
+date-modified: "August 26,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+Dependencies:
+
+-   tidyverse
+
+-   sf
+
+```{R}
+pacman::p_load(tidyverse, sf)
+```
+
+Importing Data
+
+```{R}
+mpsz14_shp = st_read(dsn = "data/MasterPlan2014SubzoneBoundaryWebSHP", 
+               layer = "MP14_SUBZONE_WEB_PL")
+```
+
+The class() function in R is used to return the values of the class attribute of an R object
+
+```{R}
+class(mpsz14_shp)
+
+```
+
+Write the geospatial data from mpsz14_shp to a KML file named MP14_SUBZONE_WEB_PL.KML.
+
+```{R}
+st_write(mpsz14_shp,"data/MasterPlan2014SubzoneBoundaryWebSHP/MP14_SUBZONE_WEB_PL.KML",delete_dsn = TRUE)
+
+```
+
+Importing Data
+
+```{R}
+mpsz19_shp = st_read(dsn = "data/MPSZ-2019", 
+               layer = "MPSZ-2019")
+```
+
+```{r}
+mqsz19_kml=st_read("data/MasterPlan2019SubzoneBoundaryNoSeaKML.kml")
+```
+
+```{R}
+class(mqsz19_kml)
+```
+
+```{r}
+st_crs(mpsz19_shp)
+```
+
+transfer crs....
+
+```{R}
+mpsz19_3414shp <- st_set_crs(mpsz19_shp, 3414)
+```
+
+i

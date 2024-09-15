@@ -1,0 +1,295 @@
+---
+title: "Take-home_Ex01"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "September 02, 2024"
+date-modified: "September 08,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Take home ex01:**Geospatial Analytics for Social Good: Application of Spatial and Spatio-temporal Point Patterns Analysis to discover the geographical distribution of Armed Conflict in Myanmar**
+
+## 1.0 Overview
+
+### 1.1 Objectives
+
+Exercise Requirements:
+
+-   Using appropriate function of **sf** and **tidyverse** packages, import and transform the downloaded armed conflict data and administrative boundary data into sf tibble data.frames.
+-   Using the geospatial data sets prepared, derive quarterly KDE layers.
+-   Using the geospatial data sets prepared, perform 2nd-Order Spatial Point Patterns Analysis.
+-   Using the geospatial data sets prepared, derive quarterly spatio-temporal KDE layers.
+-   Using the geospatial data sets prepared, perform 2nd-Order Spatio-temporal Point Patterns Analysis.
+-   Using appropriate tmap functions, display the KDE and Spatio-temporal KDE layers on openstreetmap of Myanmar.
+-   Describe the spatial patterns revealed by the KDE and Spatio-temporal KDE maps.
+
+## 2.0 Setup
+
+### 2.1 Dependencies
+
+#### 2.1.1 Core Packages:
+
+-   SF: This package provides functions for reading, manipulating, and visualizing simple features geometries. It's essential for working with spatial data in R.
+-   tidyverse: A collection of packages including dplyr, ggplot2, and readr, provides a grammar of data manipulation. It's useful for data cleaning and transformation.
+-   dplyr:
+-   lubridate:
+-   spatstat:
+
+**Visualization Package:**
+
+-   tmap: Create thematic maps quickly and easily. It's ideal for visualizing spatial data.
+
+```{R}
+pacman::p_load(tidyverse, sf, tmap, maptools, spatstat, spNetwork, classInt, viridis, arrow,dplyr,lubridate,sparr,raster,stpp)
+```
+
+### 2.2 Datasets
+
+-   **Armed conflict data**
+
+-   **GIS Data**
+
+## 3.0 Data warning
+
+### 3.1 Importing Armed conflict data
+
+-   Reads a CSV file named "Myanmar.csv" and stores the data in a variable called acled_sf.
+-   Converts to spatial object
+-   Projects to a different coordinate system
+-   Converts date format
+
+```{R}
+acled_sf <- read_csv("data/Myanmar.csv")%>% 
+  st_as_sf(coords =c("longitude", "latitude"),crs=4326)%>% 
+  st_transform(crs=32647) %>% 
+  mutate(event_date =dmy(event_date))
+```
+
+check data
+
+```{R}
+class(acled_sf)
+```
+
+filtered data
+
+```{R}
+acled_sf <- acled_sf %>%
+  mutate(quarter = quarter(event_date))
+```
+
+### 3.2 Importing GIS Data
+
+Importing polygon feature data in shapefile format
+
+```{R}
+boundry <- st_read(dsn = "data/mmr_polbnda_adm1_250k_mimu_1", layer = "mmr_polbnda_adm1_250k_mimu_1")%>%
+  st_transform(crs=32647)
+```
+
+Data inspection and visualisation
+
+Vies crs
+
+```{R}
+st_crs(boundry)
+```
+
+### 3.3 Coverting OWIN
+
+```{r}
+boundry_owin <- as.owin(boundry)
+```
+
+check data
+
+```{R}
+class(boundry_owin)
+```
+
+## 4.0 Visualising the point
+
+### 4.1Overall Pollot
+
+```{R}
+tm_shape(boundry)+tm_polygons()+tm_shape(acled_sf)+tm_dots()
+```
+
+### 4.2visualsing geographiv distribution by quarter
+
+```{R}
+tm_shape(boundry)+tm_polygons()+tm_shape(acled_sf)+tm_dots(size =0.1)+ tm_facets(by ="quarter", free.coords = FALSE, drop.units = TRUE )
+```
+
+## 5.0 Computer Acled by quarter
+
+### 5.1 Extracting Acled by quarter
+
+```{R}
+acled_quarter <- acled_sf%>%
+  dplyr::select(quarter)
+```
+
+### 5.2 Creating PPP
+
+```{R}
+acled_quarter_qqq <- as.ppp(acled_quarter)
+acled_quarter_qqq
+```
+
+#### 5.2.1check the output is in the correct object class
+
+```{R}
+summary(acled_quarter_qqq)
+```
+
+#### 5.2.2 check the duplication in a ppp obkect and deal with it
+
+```{R}
+any(duplicated(acled_quarter_qqq))
+```
+
+#### 5.2.3 deal with the duplicated points
+
+```{R}
+acled_quarter_ppp_jit <- rjitter(acled_quarter_qqq, 
+                             retry=TRUE, 
+                             nsim=1, 
+                             drop=TRUE)
+```
+
+```{R}
+any(duplicated(acled_quarter_ppp_jit))
+```
+
+### 5.3 Combining point events object and owin object
+
+```{R}
+acledMy_ppp = acled_quarter_ppp_jit[boundry_owin]
+summary(acledMy_ppp)
+```
+
+## 6.0 Ploting the KDE object
+
+### 6.1 Computing kernel density estimation using automatic bandwidth selection method
+
+```{R}
+kde_acledMy_ppp_list <- list()
+
+for (i in 1:4) {
+  acled_quarter_ppp <- acledMy_ppp[acledMy_ppp$marks == i]  
+  kde_acledMy_ppp_list[[i]] <- density(acled_quarter_ppp, kernel="gaussian")
+}
+for (i in 1:4) {
+  plot(kde_acledMy_ppp_list[[i]], main=paste("KDE AT QUARTER", i))
+}
+```
+
+## 7.0 Second-order Spatial Point Patterns Analysis
+
+### 7.1 Computing G-Function
+
+```{R}
+G_1 <- Gest(acled_quarter_qqq,correction = "border")
+plot(G_1,xlim=c(0,500))
+```
+
+### 7.2 Computing F-function estimation
+
+```{R}
+f_1 <- Fest(acled_quarter_qqq)
+plot(f_1)
+```
+
+### 7.3 Computing K-function estimation
+
+```{R}
+K_1 = Kest(acled_quarter_ppp_jit, correction = "Ripley")
+plot(K_1, . -r ~ r)
+```
+
+### 7.4 Computing L-function estimation
+
+```{R}
+L_1 = Lest(acled_quarter_ppp_jit, correction = "Ripley")
+plot(L_1, . -r ~ r)
+```
+
+## 8.0 derive quarterly spatio-temporal KDE layers.
+
+### 8.1 Computing spatio-temporal KDE
+
+```{R}
+st_kde <- spattemp.density(acledMy_ppp)
+summary(st_kde)
+```
+
+### 8.2 Ploting the Spatio-temporal KDE object
+
+```{R}
+tims <- c(1,2,3,4)
+par(mfcol= c(2,2))
+par(mar = c(2, 2, 2, 2))
+for(i in tims){
+  plot(st_kde,i,  
+  override.par= FALSE,
+  fix.range = TRUE,
+  main=paste("KDE AT Quarter", i))
+}
+```
+
+## 9.0 perform 2nd-Order Spatio-temporal Point Patterns Analysis
+
+### 9.1 Using G-Function
+
+```{R}
+G_function_results <- list()
+for (i in unique(acled_sf$quarter)) {
+  acled_quarter <- subset(acled_sf, quarter == i)
+  acled_ppp <- as.ppp(acled_quarter)
+  G_function_results[[i]] <- Gest(acled_ppp, correction = "border")
+  plot(G_function_results[[i]], main = paste("G-function for Quarter", i))
+}
+```
+
+### 9.2 Using K-function
+
+```{R}
+K_function_results <- list()
+for (i in unique(acled_sf$quarter)) {
+  acled_quarter <- subset(acled_sf, quarter == i)
+  acled_ppp <- as.ppp(acled_quarter)
+  K_function_results[[i]] <- Kest(acled_ppp, correction = "Ripley")
+  plot(K_function_results[[i]], main = paste("K-function for Quarter", i))
+}
+```
+
+### 9.3 Using L-function
+
+```{R}
+L_function_results <- list()
+for (i in unique(acled_sf$quarter)) {
+  acled_quarter <- subset(acled_sf, quarter == i)
+  acled_ppp <- as.ppp(acled_quarter)
+  L_function_results[[i]] <- Lest(acled_ppp, correction = "Ripley")
+  plot(L_function_results[[i]], main = paste("L-function for Quarter", i))
+}
+
+```
+
+### 9.4 Using F-function
+
+```{R}
+F_function_results <- list()
+for (i in unique(acled_sf$quarter)) {
+  acled_quarter <- subset(acled_sf, quarter == i)
+  acled_ppp <- as.ppp(acled_quarter)
+  F_function_results[[i]] <- Fest(acled_ppp, correction = "border")
+  plot(F_function_results[[i]], main = paste("F-function for Quarter", i))
+}
+
+```

@@ -1,0 +1,61 @@
+---
+title: "In-class exercise3"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "September 2, 2024"
+date-modified: "September 2,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+## Installing package
+
+maptools is retried and binary is removed from CRAN.
+
+```{R}
+install.packages("maptools",repos = "https://packagemanager.posit.co/cran/2023-10-13")
+```
+
+```{R}
+pacman::p_load(tidyverse,tmap,sf)
+```
+
+### Importing Geospatial Data
+
+```{R}
+childcare_sf <- st_read("data/child-care-services-geojson.geojson")
+```
+
+```{R}
+mpsz_sf <- st_read(dsn = "data", layer = "MP14_SUBZONE_WEB_PL")
+
+```
+
+### Data warning
+
+```{R}
+childcare_sf <- st_transform(childcare_sf, crs = 3414)
+mpsz_sf <- st_transform(mpsz_sf, crs = 3414)
+```
+
+### Working with St_union()
+
+st_union is used to derive the coast outline sf tibble data.frame
+
+```{R}
+sg_sf <- mpsz_sf %>%
+  st_union()
+```
+
+```{r}
+plot(sg_sf)
+```
+
+### take_home exe
+
+acled_sf \<- read_csv("")%\>% st_as_sf(coords =c("longitude", "latitude"),crs=4326)%\>% st_transform(crs=32647) %\>% mutate(event_data =dmy(event_data))
+
+tmap_mode("view") acled_sf %\>% filter(year = 2023 \| event_typr ="Poticial violence") %\>% tm_shape(), tm_dots() tmap_mode("plot")

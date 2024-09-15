@@ -1,0 +1,188 @@
+---
+title: "Hands-on exercise04"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "September 4, 2024"
+date-modified: "September 4,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Hands-on ex04:**Spatio-Temporal Point Patterns Analysis**
+
+# 1.0 Overview
+
+Hands-on ex04 shows how various R packages can be combined to run a set of spatio-temporal point pattern analyses in a guided and intuitive way.
+
+# 2.0 Package and data
+
+## 2.1 The data
+
+-   forestfires, a csv file provides locations of forest fire detected from the Moderate Resolution Imaging Spectroradiometer (MODIS) sensor data.
+
+-   Kepulauan_Bangka_Belitung, an ESRI shapefile showing the sub-district boundary of Kepulauan Bangka Belitung.
+
+## 2.2 Installing and loading the R packages
+
+-   SF
+-   raster
+-   spatstat
+-   tmap
+-   tidyverse
+
+```{R}
+pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse,animation)
+```
+
+## 2.3 Importing data
+
+### 2.3.1 Importing study area
+
+```{R}
+kbb_sf <- st_read(dsn="data/rawdata",layer = "Kepulauan_Bangka_Belitung") %>%
+  st_union() %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 32748)
+```
+
+### 2.3.2 Converting OWIN
+
+convert kbb into an owin object
+
+```{R}
+kbb_owin <- as.owin(kbb_sf)
+kbb_owin
+```
+
+confirm it
+
+```{R}
+class(kbb_owin)
+```
+
+### 2.3.3 Importing the forset fire data set
+
+```{R}
+fire_sf <- read_csv("data/rawdata/forestfires.csv")%>%
+  st_as_sf(coords = c("longitude","latitude"),crs=4326)%>%
+  st_transform(crs=32748)
+```
+
+Because ppp object only accept numerical or character as mark. Convert data type of acq_date to numeric
+
+```{R}
+fire_sf <- fire_sf%>%
+  mutate(DayofYear = yday(acq_date))%>%
+  mutate(Month_num = month(acq_date))%>%
+  mutate(Month_fac = month(acq_date,label = TRUE, abbr = FALSE))
+```
+
+# 3.0 Visualising the fire points
+
+## 3.1 Overall plot
+
+```{R}
+tm_shape(kbb_sf)+tm_polygons()+tm_shape(fire_sf)+tm_dots()
+```
+
+## 3.2 Visuaising geographic distribution of forest fires by month
+
+```{R}
+tm_shape(kbb_sf)+tm_polygons()+tm_shape(fire_sf)+tm_dots(size = 0.1)+tm_facets(by="Month_fac", free.coords = FALSE, drop.units = TRUE)
+```
+
+# 4.0 Computing STKDE by Month
+
+## 4.1 Extracting forest fires by month
+
+remove the unwanted fields from fire_sf
+
+```{r}
+fire_month <-fire_sf %>%
+  select(Month_num)
+```
+
+## 4.2 Creating ppp
+
+derive a ppp object called fire_month
+
+```{R}
+fire_month_ppp <- as.ppp(fire_month)
+fire_month_ppp
+```
+
+check the output is in the correct object classs
+```{r}
+summary(fire_month_ppp)
+```
+check if there are dupilicated point events
+```{R}
+any(duplicated(fire_month_ppp))
+```
+## 4.3 Including Owin object
+combine
+```{R}
+fire_month_owin <- fire_month_ppp[kbb_owin]
+summary(fire_month_owin)
+```
+use plot to examine the correctness of the output object
+```{R}
+plot(fire_month_owin)
+```
+## 4.4 Computing Spatio-temporal KDE
+compute the STKDE
+```{r}
+st_kde <- spattemp.density(fire_month_owin)
+summary(st_kde)
+```
+## 4.5 Plotting the spatio-temporal KDE object
+```{R}
+tims <- c(7,8,9,10,11,12)
+par(mfcol= c(2,3))
+for(i in tims){
+  plot(st_kde,i,override.par=FALSE,fix.range=TRUE,main=paste("KDE AT MONTH",i))
+}
+```
+# 5.0 Computing STKDE by Day of Year
+## 5.1 Creating ppp object
+DayofYear field is included in the output ppp object
+```{R}
+fire_yday_ppp <- fire_sf%>%
+  select(DayofYear)%>%
+  as.ppp()
+```
+## 5.2 Including Owin object
+combine the ppp object and the owin object
+```{R}
+fire_yday_owin <- fire_yday_ppp[kbb_owin]
+summary(fire_yday_owin)
+```
+## 5.3  Computing Spatio-temporal KDE
+```{R}
+kde_yday <- spattemp.density(fire_yday_owin)
+summary(kde_yday)
+```
+plot it
+```{R}
+plot(kde_yday)
+```
+# 6.0 Computing STKDE by Day of Year: Improved method
+One of the nice function provides in sparr package is BOOT.spattemp(). It support bandwidth selection for standalone spatiotemporal density/intensity based on bootstrap estimation of the MISE, providing an isotropic scalar spatial bandwidth and a scalar temporal bandwidth.
+
+uses BOOT.spattemp() to determine both the spatial bandwidth and the scalar temporal bandwidth.
+```{R}
+set.seed(1234)
+BOOT.spattemp(fire_yday_owin)
+```
+## 6.1 Computing spatio-temporal KDE
+```{R}
+kde_yday <- spattemp.density(fire_yday_owin,h=9000,lambda =19 )
+summary(kde_yday)
+```
+## 6.2 plot it
+```{R}
+plot(kde_yday)
+```
