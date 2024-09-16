@@ -1,0 +1,141 @@
+---
+title: "Hands-on exercise06"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "September 16, 2024"
+date-modified: "September 16,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Hands_on exercise06 Measures of Spatial Autocorrelation
+## 1.0 Tools and data
+### 1.1 setting the tools
+spdep: will be used to compute spatial weights, global and local spatial autocorrelation statistics.
+```{R}
+pacman::p_load(sf,spdep,tmap,tidyverse,ggplot2)
+```
+### 1.2  Importing the data
+importing the shapefile into environment
+```{R}
+hunan <- st_read(dsn = "data/geospatial", layer = "hunan")
+```
+importing csv file
+```{R}
+#| eval: false
+hunan2012 <- read_csv("data/aspatial/hunan_2012.csv")
+```
+performing relational join
+```{r}
+#| eval: false
+hunan <-left_join(hunan,hunan2012)%>%
+  select(1:4,7,15)
+```
+
+```{R}
+#| eval: false
+write_rds(hunan,"data/rds/hunan.rds")
+```
+
+```{R}
+hunan<- read_rds("data/rds/hunan.rds")
+```
+### 1.3 Visualising Region Development Indicator
+preapre a basemap and a choropleth map showing the distribution of GDPPC 2012 by using qtm() of tmaps package.
+#### 1.3.1 Equal interval classification
+```{R}
+equal <- tm_shape(hunan)+
+  tm_fill("GDPPC",
+          n=5,
+          style ="equal" )+
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Equal interval classification")
+```
+
+#### 1.3.2 Equal quantitle classification
+```{R}
+quantile <- tm_shape(hunan)+
+  tm_fill("GDPPC",
+          n=5,
+          style = "quantile")+
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Equal quantitle classification")
+```
+
+```{R}
+tmap_arrange(equal,
+             quantile,
+             asp=1,
+             ncol = 2)
+```
+
+## 2.0 Global Measures of Spatial Autocorrelation
+### 2.1 computing contiguity spatial weights
+Before we can compute the global spatial autocorrelation statistics, we need to construct a spatial weights of the area.
+poly2nb() of spdep packages is used to compute contiguity weigh for the study area.
+If you do not specify this argument the default is set to TRUE, that is, if you don’t specify queen = FALSE this function will return a list of first order neighbours using the Queen criteria.
+```{R}
+wm_q <- poly2nb(hunan, queen = TRUE)
+summary(wm_q)
+```
+the report show that there are 88 area units in hunan. The most connected area unit has 11 neightsbours. There are two units with only one neighbours.
+### 2.2 Row-standardised weights matrix
+assign weights to each neighboring polygon.
+```{r}
+rswm_q <- nb2listw(wm_q, style = "W",zero.policy = TRUE)
+rswm_q
+```
+* The input of nb2listw() must be an object of class nb. The syntax of the function has two major arguments,namely style and zero.poly
+* style can be W,B,C,U,minimax,S
+* If zero policy is set to true, weights vectors of zero length are inserted for regions without neighbour in the neighbours list.
+
+## 3.0 Global Measures of Spatial Autocorrelation: Moran's 1
+perform Moran's 1 statistics testing by using moran.test() of spdep
+### 3.1 MAron's 1 test
+Moran's statistical testing using moran.test() of spdep
+```{R}
+moran.test(hunan$GDPPC, 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+```
+alternative hypothesis greater: This indicates that the alternative hypothesis is that the moran's 1 is greater than 0, meaning that postive spatial autocorrelation is expected
+
+The result means that areas with high GDPPC tend to be clustered toghther, and areas with low GDPPC also tend to cluster together
+
+### 3.2 Computing Monte Carlo Moran's 1
+The code chunk below performs permutation test for Moran's 1 statistic by using moran.mc() of spdep. A total of 1000 simulation will be performed.
+```{R}
+set.seed(1234)
+bperm= moran.mc(hunan$GDPPC,
+                 listw = rswm_q,
+                 nsim = 999,
+                 zero.policy = TRUE,
+                 na.action = na.omit)
+bperm
+```
+The caculated Moran's value is 0.30075.The observed Moran's value has the highest rank among the 1000 simulated values, indicating it is the largest.The p-value is 0.001, which is very small.
+
+The high Moran's value and the very low p-value indicate a significant positive spatial autocorrelation. This means that areas with high GDPPC tend to be clustered together, and areas with low GDPPC also tend to cluster together.
+
+### 3.3 Visualising Monte Carlo Moran's I
+plotting the distribution of the statistical values as a histogram by using the code chunk below.
+```{R}
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+```
+In the code chunk below hist() and abline() of R Graphics are used.
+```{R}
+hist(bperm$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulate Moran's I")
+abline(v=0,col="red")
+```
+The simulated Moran's value are centered around a particular value with a relatively symmetrical spread and the majority of simulated Moran's valued are centered around 0 which is expected under the null hypothesis of no spatial autocorrelation
+
+

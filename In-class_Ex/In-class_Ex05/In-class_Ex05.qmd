@@ -12,19 +12,27 @@ execute:
 ---
 
 # Inclass_ex05: Geographically Weighted Statisticss-gwModel method
+
 ## Import data and package
+
 ```{R}
 pacman :: p_load(sf,spdep,tmap,tidyverse,knitr,GWmodel)
 ```
+
 ### impot hunnan data shapefile
+
 ```{R}
 hunan_sf <- st_read(dsn ="data/geospatial" , layer ="Hunan")
 ```
+
 ### import hunan_2012.shapefile
+
 ```{R}
 hunan2012 <- read_csv("data/aspatial/hunan_2012.csv")
 ```
+
 ### join hunan and hunan_2012 data frame
+
 ```{R}
 hunan <- left_join(hunan_sf,hunan2012)%>%
   select(1:3, 7,15, 16,31,32)
@@ -35,22 +43,26 @@ hunan <- left_join(hunan_sf,hunan2012)%>%
 write_rds(hunan_sf,"data/rds/hunan_sf.rds")
 ```
 
-
 ```{R}
 #| echo: false
 hunan_sf<- read_rds("data/rds/hunan_sf.rds")
 ```
 
 ## converting to SpatialpolygonDataFrame
+
 ```{R}
 hunan_sp <- hunan%>%
   as_Spatial()
 ```
+
 ### AIC
+
 ```{R}
 bw_AIC <- bw.gwr(GDPPC ~ 1, data = hunan_sp, approach = "AIC", adaptive = TRUE, kernel = "bisquare", longlat = T)
 ```
+
 ### Cross-validation
+
 ```{R}
   bw_CV <- bw.gwr(GDPPC ~ 1, 
                   data = hunan_sp, 
@@ -59,7 +71,9 @@ bw_AIC <- bw.gwr(GDPPC ~ 1, data = hunan_sp, approach = "AIC", adaptive = TRUE, 
                   kernel = "bisquare", 
                   longlat = T)
 ```
+
 ### computing geographically wieghted summary statics
+
 ```{R}
 gwstat <- gwss(data = hunan_sp,
                vars ="GDPPC",
@@ -70,15 +84,19 @@ gwstat <- gwss(data = hunan_sp,
 ```
 
 ### prepare data
+
 ```{R}
 gwstat_df <- as.data.frame(gwstat$SDF)
 ```
-### cbhind() is used to ppend the newly drived 
+
+### cbhind() is used to ppend the newly drived
+
 ```{R}
 hunan_gstat <- cbind(hunan_sf,gwstat_df)
 ```
 
 ## Visualising
+
 ```{R}
 tm_shape(hunan_gstat) +
   tm_fill("GDPPC_LM",
