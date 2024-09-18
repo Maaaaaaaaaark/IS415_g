@@ -149,6 +149,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.html">
  <span class="dropdown-text">Hands-on Exercise 05</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html">
+ <span class="dropdown-text">Hands-on Exercise 06</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -171,6 +175,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex04/In-class_Ex04.html">
  <span class="dropdown-text">In-class Exercise 04</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex05/In-class_Ex05.html">
+ <span class="dropdown-text">In-class Exercise 05</span></a>
   </li>  
     </ul>
   </li>
@@ -262,6 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#using-l-function" id="toc-using-l-function" class="nav-link" data-scroll-target="#using-l-function">9.3 Using L-function</a></li>
   <li><a href="#using-f-function" id="toc-using-f-function" class="nav-link" data-scroll-target="#using-f-function">9.4 Using F-function</a></li>
   </ul></li>
+  <li><a href="#display-the-kde-and-spatio-temporal-kde-layers-on-openstreetmap-of-myanmar" id="toc-display-the-kde-and-spatio-temporal-kde-layers-on-openstreetmap-of-myanmar" class="nav-link" data-scroll-target="#display-the-kde-and-spatio-temporal-kde-layers-on-openstreetmap-of-myanmar">10.0 Display the KDE and Spatio-temporal KDE layers on openstreetmap of Myanmar</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -340,9 +349,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>Visualization Package:</strong></p>
 <ul>
 <li>tmap: Create thematic maps quickly and easily. It’s ideal for visualizing spatial data.</li>
+<li>osmdata:</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, sf, tmap, maptools, spatstat, spNetwork, classInt, viridis, arrow,dplyr,lubridate,sparr,raster,stpp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, sf, tmap, maptools, spatstat, spNetwork, classInt, viridis, arrow,dplyr,lubridate,sparr,raster,stpp,osmdata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -531,7 +541,7 @@ window: rectangle = [-208804.4, 640934.5] x [1103500.1, 3042960.3] units</code><
 </div>
 </div>
 <section id="check-the-output-is-in-the-correct-object-class" class="level4">
-<h4 class="anchored" data-anchor-id="check-the-output-is-in-the-correct-object-class">5.2.1check the output is in the correct object class</h4>
+<h4 class="anchored" data-anchor-id="check-the-output-is-in-the-correct-object-class">5.2.1 check the output is in the correct object class</h4>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(acled_quarter_qqq)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -584,8 +594,8 @@ Window area = 1.64803e+12 square units</code></pre>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>acledMy_ppp <span class="ot">=</span> acled_quarter_ppp_jit[boundry_owin]</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(acledMy_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Marked planar point pattern:  51463 points
-Average intensity 7.684331e-08 points per square unit
+<pre><code>Marked planar point pattern:  51471 points
+Average intensity 7.685525e-08 points per square unit
 
 Coordinates are given to 16 decimal places
 
@@ -4283,11 +4293,11 @@ Conditioning on time...Done.</code></pre>
 <pre><code>Spatiotemporal Kernel Density Estimate
 
 Bandwidths
-  h = 43037.35 (spatial)
+  h = 43046.91 (spatial)
   lambda = 6e-04 (temporal)
 
 No. of observations
-  51463 
+  51471 
 
 Spatial bound
   Type: polygonal
@@ -4298,7 +4308,7 @@ Temporal bound
 
 Evaluation
   128 x 128 x 4 trivariate lattice
-  Density range: [1.56956e-14, 4.252361e-09]</code></pre>
+  Density range: [1.622246e-14, 4.250548e-09]</code></pre>
 </div>
 </div>
 </section>
@@ -4541,9 +4551,93 @@ marks</code></pre>
 </div>
 </div>
 </div>
-
-
 </section>
+</section>
+<section id="display-the-kde-and-spatio-temporal-kde-layers-on-openstreetmap-of-myanmar" class="level2">
+<h2 class="anchored" data-anchor-id="display-the-kde-and-spatio-temporal-kde-layers-on-openstreetmap-of-myanmar">10.0 Display the KDE and Spatio-temporal KDE layers on openstreetmap of Myanmar</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>kde_acledMy_ppp_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  acled_quarter_ppp <span class="ot">&lt;-</span> acledMy_ppp[acledMy_ppp<span class="sc">$</span>marks <span class="sc">==</span> i]  </span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  kde_acledMy_ppp_list[[i]] <span class="ot">&lt;-</span> <span class="fu">density</span>(acled_quarter_ppp, <span class="at">kernel=</span><span class="st">"gaussian"</span>)</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_acledMy_ppp_list[[i]], <span class="at">main=</span><span class="fu">paste</span>(<span class="st">"KDE AT QUARTER"</span>, i))</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-29-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-29-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-29-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Using appropriate tmap functions</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>kde_acledMy_ppp_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>kde_raster_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  acled_quarter_ppp <span class="ot">&lt;-</span> acledMy_ppp[acledMy_ppp<span class="sc">$</span>marks <span class="sc">==</span> i]  </span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  kde_acledMy_ppp_list[[i]] <span class="ot">&lt;-</span> <span class="fu">density</span>(acled_quarter_ppp, <span class="at">kernel=</span><span class="st">"gaussian"</span>)</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>  kde_raster_list[[i]] <span class="ot">&lt;-</span> <span class="fu">raster</span>(kde_acledMy_ppp_list[[i]])</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crs</span>(kde_raster_list[[i]]) <span class="ot">&lt;-</span> <span class="fu">CRS</span>(<span class="st">"+init=EPSG:32647"</span>)</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"view"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>tmap mode set to interactive viewing</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>basemap <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(boundry) <span class="sc">+</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_tiles</span>(<span class="st">"OpenStreetMap"</span>)</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  kde_layer <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(kde_raster_list[[i]]) <span class="sc">+</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_raster</span>(<span class="at">style =</span> <span class="st">"cont"</span>, <span class="at">palette =</span> <span class="st">"-RdYlBu"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"KDE Quarter"</span>, i))</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(basemap <span class="sc">+</span> kde_layer)</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol=</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> tims){</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde,i,  </span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">override.par=</span> <span class="cn">FALSE</span>,</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main=</span><span class="fu">paste</span>(<span class="st">"KDE AT Quarter"</span>, i))</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
 </section>
 </section>
 

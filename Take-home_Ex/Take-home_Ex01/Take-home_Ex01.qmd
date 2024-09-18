@@ -42,9 +42,10 @@ Exercise Requirements:
 **Visualization Package:**
 
 -   tmap: Create thematic maps quickly and easily. It's ideal for visualizing spatial data.
+-   osmdata:
 
 ```{R}
-pacman::p_load(tidyverse, sf, tmap, maptools, spatstat, spNetwork, classInt, viridis, arrow,dplyr,lubridate,sparr,raster,stpp)
+pacman::p_load(tidyverse, sf, tmap, maptools, spatstat, spNetwork, classInt, viridis, arrow,dplyr,lubridate,sparr,raster,stpp,osmdata)
 ```
 
 ### 2.2 Datasets
@@ -141,7 +142,7 @@ acled_quarter_qqq <- as.ppp(acled_quarter)
 acled_quarter_qqq
 ```
 
-#### 5.2.1check the output is in the correct object class
+#### 5.2.1 check the output is in the correct object class
 
 ```{R}
 summary(acled_quarter_qqq)
@@ -293,3 +294,50 @@ for (i in unique(acled_sf$quarter)) {
 }
 
 ```
+
+## 10.0 Display the KDE and Spatio-temporal KDE layers on openstreetmap of Myanmar
+```{r}
+kde_acledMy_ppp_list <- list()
+
+for (i in 1:4) {
+  acled_quarter_ppp <- acledMy_ppp[acledMy_ppp$marks == i]  
+  kde_acledMy_ppp_list[[i]] <- density(acled_quarter_ppp, kernel="gaussian")
+}
+for (i in 1:4) {
+  plot(kde_acledMy_ppp_list[[i]], main=paste("KDE AT QUARTER", i))
+}
+```
+Using appropriate tmap functions
+```{r}
+kde_acledMy_ppp_list <- list()
+kde_raster_list <- list()
+
+for (i in 1:4) {
+  acled_quarter_ppp <- acledMy_ppp[acledMy_ppp$marks == i]  
+  kde_acledMy_ppp_list[[i]] <- density(acled_quarter_ppp, kernel="gaussian")
+  kde_raster_list[[i]] <- raster(kde_acledMy_ppp_list[[i]])
+  crs(kde_raster_list[[i]]) <- CRS("+init=EPSG:32647")
+}
+tmap_mode("view")
+basemap <- tm_shape(boundry) +
+  tm_borders() +
+  tm_tiles("OpenStreetMap")
+for (i in 1:4) {
+  kde_layer <- tm_shape(kde_raster_list[[i]]) +
+    tm_raster(style = "cont", palette = "-RdYlBu", alpha = 0.7, title = paste("KDE Quarter", i))
+  print(basemap + kde_layer)
+}
+
+```
+```{r}
+tims <- c(1,2,3,4)
+par(mfcol= c(2,2))
+par(mar = c(2, 2, 2, 2))
+for(i in tims){
+  plot(st_kde,i,  
+  override.par= FALSE,
+  fix.range = TRUE,
+  main=paste("KDE AT Quarter", i))
+}
+```
+
