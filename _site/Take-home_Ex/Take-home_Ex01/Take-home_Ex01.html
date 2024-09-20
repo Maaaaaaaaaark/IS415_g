@@ -599,8 +599,8 @@ Window area = 1.64803e+12 square units</code></pre>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>acledMy_ppp <span class="ot">=</span> acled_quarter_ppp_jit[boundry_owin]</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(acledMy_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Marked planar point pattern:  51459 points
-Average intensity 7.683733e-08 points per square unit
+<pre><code>Marked planar point pattern:  51455 points
+Average intensity 7.683136e-08 points per square unit
 
 Coordinates are given to 16 decimal places
 
@@ -4298,11 +4298,11 @@ Conditioning on time...Done.</code></pre>
 <pre><code>Spatiotemporal Kernel Density Estimate
 
 Bandwidths
-  h = 43034.65 (spatial)
+  h = 43032.32 (spatial)
   lambda = 6e-04 (temporal)
 
 No. of observations
-  51459 
+  51455 
 
 Spatial bound
   Type: polygonal
@@ -4313,7 +4313,7 @@ Temporal bound
 
 Evaluation
   128 x 128 x 4 trivariate lattice
-  Density range: [1.574889e-14, 4.252656e-09]</code></pre>
+  Density range: [1.583384e-14, 4.253243e-09]</code></pre>
 </div>
 </div>
 </section>
@@ -4635,6 +4635,8 @@ determined.</code></pre>
 </div>
 </div>
 </div>
+<p>Overall, the KDE plot highlights a clear spatial pattern of conflict concentration in central and northern Myanmar, with a decreasing gradient towards the periphery. The clustering and dispersion patterns suggest that the conflict is not evenly distributed but rather concentrated in specific regions.</p>
+<p>The highest density of events is observed in the central and northern regions of Myanmar. This suggests that these areas have experienced a higher frequency of conflict compared to other regions.</p>
 </section>
 <section id="plotting-the-spatio-temporal-kde-layers" class="level3">
 <h3 class="anchored" data-anchor-id="plotting-the-spatio-temporal-kde-layers">10.3 plotting the Spatio-temporal KDE layers</h3>
@@ -4669,6 +4671,7 @@ determined.</code></pre>
 </div>
 </div>
 </div>
+<p>The visualization show the intensity of conflict events, with colors ranging from blue (low conflict) to red and yellow (high conflict concentration). The conflicts are primarily concentrated in central and northern Myanmar, and although the distribution changes slightly over time, the overall pattern remains consistent.</p>
 
 
 </section>

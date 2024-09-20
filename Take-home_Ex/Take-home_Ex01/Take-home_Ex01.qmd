@@ -326,8 +326,12 @@ for (i in 1:4) {
     tm_basemap(server = "OpenStreetMap") +      
     tm_layout(main.title = paste("KDE"))   
 ```
+Overall, the KDE plot highlights a clear spatial pattern of conflict concentration in central and northern Myanmar, with a decreasing gradient towards the periphery. The clustering and dispersion patterns suggest that the conflict is not evenly distributed but rather concentrated in specific regions.
+
+The highest density of events is observed in the central and northern regions of Myanmar. This suggests that these areas have experienced a higher frequency of conflict compared to other regions.
 
 ### 10.3 plotting the Spatio-temporal KDE layers
 ```{r}
 plot(st_kde)
 ```
+The visualization show the intensity of conflict events, with colors ranging from blue (low conflict) to red and yellow (high conflict concentration). The conflicts are primarily concentrated in central and northern Myanmar, and although the distribution changes slightly over time, the overall pattern remains consistent.
