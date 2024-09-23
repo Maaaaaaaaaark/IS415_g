@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "IS415_g",
     "section": "",
-    "text": "Wellcome!!!!"
+    "text": "Wellcome!!!!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHands-on exercise01\n\n\n\n\n\n\n\n\n\n\n\nAug 16, 2024\n\n\nYuheng Liang\n\n\n\n\n\n\n\n\n\n\n\n\nHands-on exercise02\n\n\n\n\n\n\n\n\n\n\n\nAug 23, 2024\n\n\nYuheng Liang\n\n\n\n\n\n\n\n\n\n\n\n\nHands-on exercise03\n\n\n\n\n\n\n\n\n\n\n\nAug 27, 2024\n\n\nYuheng Liang\n\n\n\n\n\n\n\n\n\n\n\n\nHands-on exercise04\n\n\n\n\n\n\n\n\n\n\n\nSep 4, 2024\n\n\nYuheng Liang\n\n\n\n\n\n\n\n\n\n\n\n\nHands-on exercise05\n\n\n\n\n\n\n\n\n\n\n\nSep 12, 2024\n\n\nYuheng Liang\n\n\n\n\n\n\n\n\n\n\n\n\nHands-on exercise06\n\n\n\n\n\n\n\n\n\n\n\nSep 16, 2024\n\n\nYuheng Liang\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
@@ -747,5 +747,54 @@
     "title": "Take-home_Ex01",
     "section": "",
     "text": "kde_acledMy_ppp_list &lt;- list()\n\nfor (i in 1:4) {\n  acled_quarter_ppp &lt;- acledMy_ppp[acledMy_ppp$marks == i]  \n  kde_acledMy_ppp_list[[i]] &lt;- density(acled_quarter_ppp, kernel=\"gaussian\")\n}\nfor (i in 1:4) {\n  plot(kde_acledMy_ppp_list[[i]], main=paste(\"KDE AT QUARTER\", i))\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n  kde_acledMy_ppp_kne &lt;- density(acled_quarter_ppp, kernel=\"gaussian\")\n\n\n kde_acledMy_ppp_kne &lt;- raster(kde_acledMy_ppp_kne)\n\n\n  tm_shape(kde_acledMy_ppp_kne) +               \n    tm_raster(palette = \"viridis\",             \n              title = paste(\"KDE\")) + \n    tm_basemap(server = \"OpenStreetMap\") +      \n    tm_layout(main.title = paste(\"KDE\"))   \n\nWarning: The projection of the shape object kde_acledMy_ppp_kne is not known,\nwhile it seems to be projected.\n\n\nWarning: Current projection of shape kde_acledMy_ppp_kne unknown and cannot be\ndetermined.\n\n\nLegend labels were too wide. The labels have been resized to 0.25, 0.25, 0.25, 0.25, 0.25, 0.25. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.\n\n\n\n\n\n\n\n\n\nOverall, the KDE plot highlights a clear spatial pattern of conflict concentration in central and northern Myanmar, with a decreasing gradient towards the periphery. The clustering and dispersion patterns suggest that the conflict is not evenly distributed but rather concentrated in specific regions.\nThe highest density of events is observed in the central and northern regions of Myanmar. This suggests that these areas have experienced a higher frequency of conflict compared to other regions.\n\n\n\n\nplot(st_kde)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe visualization show the intensity of conflict events, with colors ranging from blue (low conflict) to red and yellow (high conflict concentration). The conflicts are primarily concentrated in central and northern Myanmar, and although the distribution changes slightly over time, the overall pattern remains consistent."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html",
+    "title": "In-class_Ex06",
+    "section": "",
+    "text": "pacman::p_load(sf,tmap,sfdep,tidyverse)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#importing-data",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#importing-data",
+    "title": "In-class_Ex06",
+    "section": "Importing data",
+    "text": "Importing data\n\nhunan &lt;- st_read(dsn = \"data/geospatial\", layer = \"Hunan\")\n\nReading layer `Hunan' from data source \n  `/Users/liangyuhang/Downloads/Maaaaaaaaaark/IS415_g/In-class_Ex/In-class_Ex06/data/geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 88 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#attribute-data",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#attribute-data",
+    "title": "In-class_Ex06",
+    "section": "Attribute data",
+    "text": "Attribute data\n\nhunan2012 &lt;- read_csv(\"data/aspatial/hunan_2012.csv\")\n\nRows: 88 Columns: 29\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr  (2): County, City\ndbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#combining-both-data-frame-by-using-left-join",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#combining-both-data-frame-by-using-left-join",
+    "title": "In-class_Ex06",
+    "section": "Combining both data frame by using left join",
+    "text": "Combining both data frame by using left join\n\nhunan_GDPPC &lt;-left_join(hunan,hunan2012)%&gt;%\n  select(1:4,7,15)\n\nJoining with `by = join_by(County)`"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#step-1",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#step-1",
+    "title": "In-class_Ex06",
+    "section": "step 1",
+    "text": "step 1\nThis is to ensure that the computation is reproducible\n\nset.seed(1234)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#step-2",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#step-2",
+    "title": "In-class_Ex06",
+    "section": "step 2",
+    "text": "step 2\nglobal_moran_perm is used to perform Monte Varlo simoulation\n\nglobal_moran_perm(wm_q$GDPPC,\n                  wm_q$nb,\n                  wm_q$wt,\n                  nsim=99)\n\n\n    Monte-Carlo simulation of Moran I\n\ndata:  x \nweights: listw  \nnumber of simulations + 1: 100 \n\nstatistic = 0.30075, observed rank = 100, p-value &lt; 2.2e-16\nalternative hypothesis: two.sided"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#computing-local-gi-statistics",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html#computing-local-gi-statistics",
+    "title": "In-class_Ex06",
+    "section": "Computing local Gi* statistics",
+    "text": "Computing local Gi* statistics\n\nwm_idw &lt;- hunan_GDPPC %&gt;%\n  mutate(nb = st_contiguity(geometry),\n         wts = st_inverse_distance(nb,geometry,\n                                   scale =1,\n                                   alpha =1),\n         .before= 1)\n\n! Polygon provided. Using point on surface.\n\n\nWarning: There was 1 warning in `stopifnot()`.\nℹ In argument: `wts = st_inverse_distance(nb, geometry, scale = 1, alpha = 1)`.\nCaused by warning in `st_point_on_surface.sfc()`:\n! st_point_on_surface may not give correct results for longitude/latitude data\n\n\n\nHCSA &lt;- wm_idw%&gt;%\n  mutate(local_Gi= local_gstar_perm(\n    GDPPC,nb,wt,nsim=99\n  ),.before=1)%&gt;%\n  unnest(local_Gi)\nHCSA\n\nSimple feature collection with 88 features and 18 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84\n# A tibble: 88 × 19\n   gi_star cluster   e_gi     var_gi std_dev p_value p_sim p_folded_sim skewness\n     &lt;dbl&gt; &lt;fct&gt;    &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;    &lt;dbl&gt;\n 1  0.0416 Low     0.0114 0.00000641  0.0493 9.61e-1  0.7          0.35    0.875\n 2 -0.333  Low     0.0106 0.00000384 -0.0941 9.25e-1  1            0.5     0.661\n 3  0.281  High    0.0126 0.00000751 -0.151  8.80e-1  0.9          0.45    0.640\n 4  0.411  High    0.0118 0.00000922  0.264  7.92e-1  0.6          0.3     0.853\n 5  0.387  High    0.0115 0.00000956  0.339  7.34e-1  0.62         0.31    1.07 \n 6 -0.368  High    0.0118 0.00000591 -0.583  5.60e-1  0.72         0.36    0.594\n 7  3.56   High    0.0151 0.00000731  2.61   9.01e-3  0.06         0.03    1.09 \n 8  2.52   High    0.0136 0.00000614  1.49   1.35e-1  0.2          0.1     1.12 \n 9  4.56   High    0.0144 0.00000584  3.53   4.17e-4  0.04         0.02    1.23 \n10  1.16   Low     0.0104 0.00000370  1.82   6.86e-2  0.12         0.06    0.416\n# ℹ 78 more rows\n# ℹ 10 more variables: kurtosis &lt;dbl&gt;, nb &lt;nb&gt;, wts &lt;list&gt;, NAME_2 &lt;chr&gt;,\n#   ID_3 &lt;int&gt;, NAME_3 &lt;chr&gt;, ENGTYPE_3 &lt;chr&gt;, County &lt;chr&gt;, GDPPC &lt;dbl&gt;,\n#   geometry &lt;POLYGON [°]&gt;\n\n\n\nHCSA_sig &lt;- HCSA %&gt;%\n  filter(p_sim &lt; 0.05)\ntmap_mode(\"plot\")\n\ntmap mode set to plotting\n\ntm_shape(HCSA)+\n  tm_polygons()+\n  tm_borders(alpha = 0.5)+\ntm_shape(HCSA_sig)+\n  tm_fill(\"gi_star\")+\n  tm_borders(alpha = 0.4)\n\nWarning: One tm layer group has duplicated layer types, which are omitted. To\ndraw multiple layers of the same type, use multiple layer groups (i.e. specify\ntm_shape prior to each of them).\n\n\nVariable(s) \"gi_star\" contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full spectrum of the color palette.\n\n\n\n\n\n\n\n\n\n\nHCSA_sig &lt;- HCSA %&gt;%\n  filter(p_sim &lt; 0.05)\ntmap_mode(\"plot\")\n\ntmap mode set to plotting\n\ntm_shape(HCSA)+\n  tm_polygons()+\n  tm_borders(alpha = 0.5)+\ntm_shape(HCSA_sig)+\n  tm_fill(\"cluster\")+\n  tm_borders(alpha = 0.4)\n\nWarning: One tm layer group has duplicated layer types, which are omitted. To\ndraw multiple layers of the same type, use multiple layer groups (i.e. specify\ntm_shape prior to each of them)."
   }
 ]

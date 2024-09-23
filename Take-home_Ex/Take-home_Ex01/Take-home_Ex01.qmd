@@ -330,6 +330,7 @@ Overall, the KDE plot highlights a clear spatial pattern of conflict concentrati
 
 The highest density of events is observed in the central and northern regions of Myanmar. This suggests that these areas have experienced a higher frequency of conflict compared to other regions.
 
+
 ### 10.3 plotting the Spatio-temporal KDE layers
 ```{r}
 plot(st_kde)
