@@ -1,0 +1,76 @@
+---
+title: "Take-home_Ex02"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "September 24, 2024"
+date-modified: "Oct 1,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Take home exe2
+
+## 1.0Setting the Analytical Tools
+
+```{r}
+pacman::p_load(sf,spdep,tmap,tidyverse)
+```
+
+## 2.0 Getting the data into R Environment
+
+### 2.1 Import shapefile into r environment
+
+```{r}
+Thailand_Map <- st_read(dsn = "data/tha_adm_rtsd_itos_20210121_shp", layer = "tha_admbnda_adm1_rtsd_20220121" )
+```
+
+### 2.2 Import. csv file into r environment
+
+```{r}
+Thailand <- read_csv("data/archive/thai_drug_offenses_2017_2022.csv")
+```
+
+### 2.3 data marning
+
+left join the data
+
+```{r}
+Thailand_Map_Drug <- left_join(Thailand_Map, Thailand, by = c("ADM1_EN" = "province_en"))%>%
+  select(3,17,18,19,21)
+```
+
+flit the drug abuse data
+
+```{r}
+unique(Thailand_Map_Drug$types_of_drug_offenses)
+```
+
+```{r}
+Thailand_Map_Drug <- subset(Thailand_Map_Drug, types_of_drug_offenses == "drug_use_cases")
+```
+
+Visualising the data
+
+```{r}
+equal <- tm_shape(Thailand_Map_Drug) +
+  tm_fill("no_cases",
+          n = 5,
+          style = "equal") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "interval classification",legend.width = 0.5)
+
+quantile <- tm_shape(Thailand_Map_Drug) +
+  tm_fill("no_cases",
+          n = 5,
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "quantile classification",legend.width = 0.5)
+
+tmap_arrange(equal, 
+             quantile)
+```
+
+## 
