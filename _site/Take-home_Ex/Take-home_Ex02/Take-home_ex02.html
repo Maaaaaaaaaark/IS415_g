@@ -195,6 +195,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html">
  <span class="dropdown-text">Take-home Exercise 01</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html">
+ <span class="dropdown-text">Take-home Exercise 02</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -232,7 +236,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#import.-csv-file-into-r-environment" id="toc-import.-csv-file-into-r-environment" class="nav-link" data-scroll-target="#import.-csv-file-into-r-environment">2.2 Import. csv file into r environment</a></li>
   <li><a href="#data-marning" id="toc-data-marning" class="nav-link" data-scroll-target="#data-marning">2.3 data marning</a></li>
   </ul></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  <li><a href="#global-measures-of-spatial-autocorrelation" id="toc-global-measures-of-spatial-autocorrelation" class="nav-link" data-scroll-target="#global-measures-of-spatial-autocorrelation">3.0 Global Measures of Spatial Autocorrelation</a>
+  <ul class="collapse">
+  <li><a href="#computing-contiguity-spatial-weights" id="toc-computing-contiguity-spatial-weights" class="nav-link" data-scroll-target="#computing-contiguity-spatial-weights">3.1 Computing Contiguity Spatial Weights</a></li>
+  </ul></li>
+  <li><a href="#row-standardised-weights-matrix" id="toc-row-standardised-weights-matrix" class="nav-link" data-scroll-target="#row-standardised-weights-matrix">Row-standardised weights matrix</a></li>
+  <li><a href="#global-measures-of-spatial-autocorrelation-morans-i" id="toc-global-measures-of-spatial-autocorrelation-morans-i" class="nav-link" data-scroll-target="#global-measures-of-spatial-autocorrelation-morans-i">Global Measures of Spatial Autocorrelation: Moran’s I</a>
+  <ul class="collapse">
+  <li><a href="#marons-i-test" id="toc-marons-i-test" class="nav-link" data-scroll-target="#marons-i-test">Maron’s I test</a></li>
+  <li><a href="#computing-monte-carlo-morans-i" id="toc-computing-monte-carlo-morans-i" class="nav-link" data-scroll-target="#computing-monte-carlo-morans-i">Computing Monte Carlo Moran’s I</a></li>
+  <li><a href="#visualising-monte-carlo-morans-i" id="toc-visualising-monte-carlo-morans-i" class="nav-link" data-scroll-target="#visualising-monte-carlo-morans-i">Visualising Monte Carlo Moran’s I</a></li>
+  </ul></li>
+  <li><a href="#global-measures-of-spatial-autocorrelation-gearys-c" id="toc-global-measures-of-spatial-autocorrelation-gearys-c" class="nav-link" data-scroll-target="#global-measures-of-spatial-autocorrelation-gearys-c">Global Measures of Spatial Autocorrelation: Geary’s C</a>
+  <ul class="collapse">
+  <li><a href="#gearys-c-test" id="toc-gearys-c-test" class="nav-link" data-scroll-target="#gearys-c-test">Geary’s C test</a></li>
+  <li><a href="#computing-monte-carlo-gearys-c" id="toc-computing-monte-carlo-gearys-c" class="nav-link" data-scroll-target="#computing-monte-carlo-gearys-c">Computing Monte Carlo Geary’s C</a></li>
+  <li><a href="#visualising-the-monte-carlo-gearys-c" id="toc-visualising-the-monte-carlo-gearys-c" class="nav-link" data-scroll-target="#visualising-the-monte-carlo-gearys-c">Visualising the Monte Carlo Geary’s C</a></li>
+  </ul></li>
+  <li><a href="#spatial-correlogram" id="toc-spatial-correlogram" class="nav-link" data-scroll-target="#spatial-correlogram">Spatial Correlogram</a>
+  <ul class="collapse">
+  <li><a href="#compute-morans-i-correlogram" id="toc-compute-morans-i-correlogram" class="nav-link" data-scroll-target="#compute-morans-i-correlogram">Compute Moran’s I correlogram</a></li>
+  <li><a href="#compute-gearys-c-correlogram-and-plot" id="toc-compute-gearys-c-correlogram-and-plot" class="nav-link" data-scroll-target="#compute-gearys-c-correlogram-and-plot"><strong>Compute Geary’s C correlogram and plot</strong></a></li>
+  </ul></li>
+  <li><a href="#local-indicators-of-spatial-associationlisa" id="toc-local-indicators-of-spatial-associationlisa" class="nav-link" data-scroll-target="#local-indicators-of-spatial-associationlisa">Local Indicators of Spatial Association(LISA)</a>
+  <ul class="collapse">
+  <li><a href="#computing-local-morans-i" id="toc-computing-local-morans-i" class="nav-link" data-scroll-target="#computing-local-morans-i">Computing local Moran’s I</a></li>
+  <li><a href="#mapping-the-local-morans-i" id="toc-mapping-the-local-morans-i" class="nav-link" data-scroll-target="#mapping-the-local-morans-i">Mapping the local Moran’s I</a></li>
+  <li><a href="#mapping-local-morans-i-p-values" id="toc-mapping-local-morans-i-p-values" class="nav-link" data-scroll-target="#mapping-local-morans-i-p-values">Mapping local Moran’s I p-values</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -282,7 +313,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setting-the-analytical-tools" class="level2">
 <h2 class="anchored" data-anchor-id="setting-the-analytical-tools">1.0Setting the Analytical Tools</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf,spdep,tmap,tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf,spdep,tmap,tidyverse,dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="getting-the-data-into-r-environment" class="level2">
@@ -380,10 +411,431 @@ dbl (2): fiscal_year, no_cases
 </div>
 </section>
 </section>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
+<section id="global-measures-of-spatial-autocorrelation" class="level2">
+<h2 class="anchored" data-anchor-id="global-measures-of-spatial-autocorrelation">3.0 Global Measures of Spatial Autocorrelation</h2>
+<section id="computing-contiguity-spatial-weights" class="level3">
+<h3 class="anchored" data-anchor-id="computing-contiguity-spatial-weights">3.1 Computing Contiguity Spatial Weights</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(Thailand_Map_Drug, </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">queen=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in poly2nb(Thailand_Map_Drug, queen = TRUE): neighbour object has 2 sub-graphs;
+if this sub-graph count seems unexpected, try increasing the snap argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 450 
+Number of nonzero links: 14130 
+Percentage nonzero weights: 6.977778 
+Average number of links: 31.4 
+2 disjoint connected subgraphs
+Link number distribution:
+
+  5  11  17  23  29  35  41  47  53  59 
+  6   6  36 108  84  96  66  30   6  12 
+6 least connected regions:
+6147 6148 6149 6150 6151 6152 with 5 links
+12 most connected regions:
+2499 2500 2501 2502 2503 2504 4611 4612 4613 4614 4615 4616 with 59 links</code></pre>
+</div>
+</div>
+<p>The summary report above shows that there are 450 area units in Thailand. The most connected area unit has 12 neighbours. There are 6 area units with only 5 neighbours.</p>
+</section>
+</section>
+<section id="row-standardised-weights-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="row-standardised-weights-matrix">Row-standardised weights matrix</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rswm_q <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(wm_q, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">style=</span><span class="st">"W"</span>, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>rswm_q</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Characteristics of weights list object:
+Neighbour list object:
+Number of regions: 450 
+Number of nonzero links: 14130 
+Percentage nonzero weights: 6.977778 
+Average number of links: 31.4 
+2 disjoint connected subgraphs
+
+Weights style: W 
+Weights constants summary:
+    n     nn  S0       S1       S2
+W 450 202500 450 32.41275 1833.241</code></pre>
+</div>
+</div>
+</section>
+<section id="global-measures-of-spatial-autocorrelation-morans-i" class="level2">
+<h2 class="anchored" data-anchor-id="global-measures-of-spatial-autocorrelation-morans-i">Global Measures of Spatial Autocorrelation: Moran’s I</h2>
+<section id="marons-i-test" class="level3">
+<h3 class="anchored" data-anchor-id="marons-i-test">Maron’s I test</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">moran.test</span>(Thailand_Map_Drug<span class="sc">$</span>no_cases, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">listw=</span>rswm_q, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">zero.policy =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">na.action=</span>na.omit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Moran I test under randomisation
+
+data:  Thailand_Map_Drug$no_cases  
+weights: rswm_q    
+
+Moran I statistic standard deviate = 13.215, p-value &lt; 2.2e-16
+alternative hypothesis: greater
+sample estimates:
+Moran I statistic       Expectation          Variance 
+     0.1573096432     -0.0022271715      0.0001457534 </code></pre>
+</div>
+</div>
+<p>The p-value is extremely small, suggesting that the result is highly significant.Moran I statistic, indicating the degree of positive spatial autocorrelation under the given weights. A positive value suggests that high-value areas tend to cluster together.The alternative hypothesi is greater indicates the alternative hypothesis, focusing on positive autocorrelation, meaning that areas with a high number of cases are likely to be adjacent to other areas with a high number of cases.</p>
+</section>
+<section id="computing-monte-carlo-morans-i" class="level3">
+<h3 class="anchored" data-anchor-id="computing-monte-carlo-morans-i">Computing Monte Carlo Moran’s I</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>bperm<span class="ot">=</span> <span class="fu">moran.mc</span>(Thailand_Map_Drug<span class="sc">$</span>no_cases, </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">listw=</span>rswm_q, </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">nsim=</span><span class="dv">999</span>, </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">zero.policy =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">na.action=</span>na.omit)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>bperm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Monte-Carlo simulation of Moran I
+
+data:  Thailand_Map_Drug$no_cases 
+weights: rswm_q  
+number of simulations + 1: 1000 
+
+statistic = 0.15731, observed rank = 1000, p-value = 0.001
+alternative hypothesis: greater</code></pre>
+</div>
+</div>
+<p>The output indicates strong evidence of positive spatial autocorrelation in the case numbers across the regions in Thailand.And the output of the p-value mean that it is not generate by random. The observed Moran’s I value is significantly higher than what would be expected by chance, suggesting that regions with high case numbers are clustering together.</p>
+</section>
+<section id="visualising-monte-carlo-morans-i" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-monte-carlo-morans-i">Visualising Monte Carlo Moran’s I</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(bperm<span class="sc">$</span>res, </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">freq=</span><span class="cn">TRUE</span>, </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks=</span><span class="dv">20</span>, </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"Simulated Moran's I"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fl">0.15731</span>, </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">col=</span><span class="st">"red"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_ex02_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The histogram displays the distribution of simulated Moran’s I values, most of which are close to zero.As fot the observed Moran’s I (0.15731) is far greater than these simulated values, falling in the extreme right tail of the distribution, as shown in the histogram.The p-value (0.001) and the observed rank of 1000 indicate that this observed spatial autocorrelation is highly significant, confirming that drug use cases are spatially clustered in Thailand rather than randomly distributed.</p>
+</section>
+</section>
+<section id="global-measures-of-spatial-autocorrelation-gearys-c" class="level2">
+<h2 class="anchored" data-anchor-id="global-measures-of-spatial-autocorrelation-gearys-c">Global Measures of Spatial Autocorrelation: Geary’s C</h2>
+<section id="gearys-c-test" class="level3">
+<h3 class="anchored" data-anchor-id="gearys-c-test">Geary’s C test</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">geary.test</span>(Thailand_Map_Drug<span class="sc">$</span>no_cases, <span class="at">listw=</span>rswm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Geary C test under randomisation
+
+data:  Thailand_Map_Drug$no_cases 
+weights: rswm_q   
+
+Geary C statistic standard deviate = 4.0279, p-value = 2.814e-05
+alternative hypothesis: Expectation greater than statistic
+sample estimates:
+Geary C statistic       Expectation          Variance 
+     0.8915381430      1.0000000000      0.0007250873 </code></pre>
+</div>
+</div>
+<p>The calculated Geary C statistic is 0.8915. This value is less than 1, indicating that the sample exhibits positive spatial autocorrelation, meaning that nearby areas tend to have similar case counts.The p-value is 2.814e-05 (or 0.00002814), which is very small and indicates that the result is statistically significant. Generally, if the p-value is less than 0.05, we can reject the null hypothesis, suggesting significant spatial autocorrelation exists.Overall, these results indicate that in the context of drug cases in Thailand, the spatial distribution of cases is not random but shows significant positive spatial autocorrelation.</p>
+</section>
+<section id="computing-monte-carlo-gearys-c" class="level3">
+<h3 class="anchored" data-anchor-id="computing-monte-carlo-gearys-c">Computing Monte Carlo Geary’s C</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>bperm<span class="ot">=</span><span class="fu">geary.mc</span>(Thailand_Map_Drug<span class="sc">$</span>no_cases, </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">listw=</span>rswm_q, </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">nsim=</span><span class="dv">999</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>bperm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Monte-Carlo simulation of Geary C
+
+data:  Thailand_Map_Drug$no_cases 
+weights: rswm_q  
+number of simulations + 1: 1000 
+
+statistic = 0.89154, observed rank = 1, p-value = 0.001
+alternative hypothesis: greater</code></pre>
+</div>
+</div>
+<p>The calculated Geary C statistic is 0.89154. This value indicates positive spatial autocorrelation in the sample, meaning that nearby areas tend to have similar case counts.The p-value is 0.001, which is very small and indicates that the result is statistically significant. Overall, these results suggest that in the context of drug cases in Thailand, the spatial distribution of cases is not random but shows significant positive spatial autocorrelation.</p>
+</section>
+<section id="visualising-the-monte-carlo-gearys-c" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-the-monte-carlo-gearys-c">Visualising the Monte Carlo Geary’s C</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(bperm<span class="sc">$</span>res, <span class="at">freq=</span><span class="cn">TRUE</span>, <span class="at">breaks=</span><span class="dv">20</span>, <span class="at">xlab=</span><span class="st">"Simulated Geary c"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fl">0.89154</span>, <span class="at">col=</span><span class="st">"red"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_ex02_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The observed spatial autocorrelation is stronger than what would be expected by random chance. This suggests that the distribution of cases is not random, indicating a clustering effect in your data. Overall, this aligns with your previous analysis, highlighting the presence of important spatial influencing factors in your dataset.</p>
+</section>
+</section>
+<section id="spatial-correlogram" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-correlogram">Spatial Correlogram</h2>
+<section id="compute-morans-i-correlogram" class="level3">
+<h3 class="anchored" data-anchor-id="compute-morans-i-correlogram">Compute Moran’s I correlogram</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>MI_corr <span class="ot">&lt;-</span> <span class="fu">sp.correlogram</span>(wm_q, </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                          Thailand_Map_Drug<span class="sc">$</span>no_cases, </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">order=</span><span class="dv">10</span>, </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method=</span><span class="st">"I"</span>, </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">style=</span><span class="st">"W"</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 1 neighbour object has 2
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 2 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 3 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 4 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 5 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 6 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 7 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 8 neighbour object has 9
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 9 neighbour object has 19
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 10 neighbour object has 49
+sub-graphs</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(MI_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_ex02_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Strong Autocorrelation Among First-Order Neighbors： The Moran’s I value for first-order neighbors (order = 1) is approximately 0.15 in the Correlogram. This suggests that there is a spatial clustering effect in certain areas where the number of drug offenses is high, indicating that high-case areas are located close to each other. Decreasing Autocorrelation with Increased Distance: As increase the order of neighbors (for example, to order = 5), the Moran’s I values in the Correlogram approach 0. This indicates that there is no significant spatial correlation among areas that are farther away from these clustered regions. In other words, as you move away from these high-case areas, the distribution of drug offenses becomes increasingly random.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(MI_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatial correlogram for Thailand_Map_Drug$no_cases 
+method: Moran's I
+            estimate expectation    variance standard deviate Pr(I) two sided
+1 (450)   1.5731e-01 -2.2272e-03  1.4575e-04          13.2145       &lt; 2.2e-16
+2 (444)  -4.0391e-02 -2.2573e-03  1.0508e-04          -3.7199       0.0001993
+3 (444)  -3.3936e-02 -2.2573e-03  8.5696e-05          -3.4221       0.0006214
+4 (444)   1.7777e-02 -2.2573e-03  8.8783e-05           2.1263       0.0334809
+5 (444)  -1.2165e-02 -2.2573e-03  9.3793e-05          -1.0231       0.3062732
+6 (444)  -6.1258e-03 -2.2573e-03  1.1744e-04          -0.3570       0.7211180
+7 (444)  -4.9293e-02 -2.2573e-03  1.6343e-04          -3.6793       0.0002339
+8 (444)   7.2810e-03 -2.2573e-03  2.0072e-04           0.6732       0.5007913
+9 (438)  -7.3029e-03 -2.2883e-03  2.2680e-04          -0.3330       0.7391557
+10 (408) -5.2020e-03 -2.4570e-03  2.3266e-04          -0.1800       0.8571795
+            
+1 (450)  ***
+2 (444)  ***
+3 (444)  ***
+4 (444)  *  
+5 (444)     
+6 (444)     
+7 (444)  ***
+8 (444)     
+9 (438)     
+10 (408)    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="compute-gearys-c-correlogram-and-plot" class="level3">
+<h3 class="anchored" data-anchor-id="compute-gearys-c-correlogram-and-plot"><strong>Compute Geary’s C correlogram and plot</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>GC_corr <span class="ot">&lt;-</span> <span class="fu">sp.correlogram</span>(wm_q, </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>                          Thailand_Map_Drug<span class="sc">$</span>no_cases, </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">order=</span><span class="dv">10</span>, </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method=</span><span class="st">"C"</span>, </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">style=</span><span class="st">"W"</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 1 neighbour object has 2
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 2 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 3 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 4 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 5 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 6 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 7 neighbour object has 7
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 8 neighbour object has 9
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 9 neighbour object has 19
+sub-graphs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nblag(neighbours, maxlag = order): lag 10 neighbour object has 49
+sub-graphs</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(GC_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_ex02_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(GC_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatial correlogram for Thailand_Map_Drug$no_cases 
+method: Geary's C
+           estimate expectation   variance standard deviate Pr(I) two sided    
+1 (450)  0.89153814  1.00000000 0.00072509          -4.0279       5.627e-05 ***
+2 (444)  1.09395639  1.00000000 0.00108188           2.8565        0.004283 ** 
+3 (444)  0.97411571  1.00000000 0.00115702          -0.7610        0.446677    
+4 (444)  0.89941590  1.00000000 0.00227911          -2.1069        0.035125 *  
+5 (444)  0.98071039  1.00000000 0.00369355          -0.3174        0.750943    
+6 (444)  0.96120901  1.00000000 0.00620021          -0.4926        0.622268    
+7 (444)  1.02272331  1.00000000 0.01092993           0.2174        0.827934    
+8 (444)  1.04350655  1.00000000 0.01510478           0.3540        0.723342    
+9 (438)  1.00070260  1.00000000 0.01639252           0.0055        0.995622    
+10 (408) 0.83840972  1.00000000 0.01682899          -1.2456        0.212903    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>In Moran’s I results, the first-order neighbors show positive spatial autocorrelation. Similarly, the Geary’s C results indicate that there is positive spatial autocorrelation at smaller lags. Both indicate that drug abuse cases are spatially clustered in local areas.<br>
+Moran’s I approaches 0 as the lag number increases, which is consistent with the trend in Geary’s C, i.e., spatial autocorrelation weakens as the lag increases. This suggests that areas farther from the clustered regions tend to be distributed randomly, and both statistics point to an insignificant global spatial autocorrelation.</p>
+</section>
+</section>
+<section id="local-indicators-of-spatial-associationlisa" class="level2">
+<h2 class="anchored" data-anchor-id="local-indicators-of-spatial-associationlisa">Local Indicators of Spatial Association(LISA)</h2>
+<section id="computing-local-morans-i" class="level3">
+<h3 class="anchored" data-anchor-id="computing-local-morans-i">Computing local Moran’s I</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>fips <span class="ot">&lt;-</span> <span class="fu">order</span>(Thailand_Map_Drug<span class="sc">$</span>no_cases)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>localMI <span class="ot">&lt;-</span> <span class="fu">localmoran</span>(Thailand_Map_Drug<span class="sc">$</span>no_cases, rswm_q)</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(localMI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Ii          E.Ii      Var.Ii     Z.Ii Pr(z != E(Ii))
+1 2.0031708 -0.0518028694 0.490979386 2.932747   0.0033597734
+2 2.5496777 -0.1114307739 0.989708320 2.674909   0.0074749594
+3 2.4083949 -0.0907523063 0.824803860 2.751798   0.0059269124
+4 1.6642394 -0.0317291756 0.307090542 3.060445   0.0022100831
+5 1.6473179 -0.0309216368 0.299524380 3.066464   0.0021660691
+6 0.1946443 -0.0003074004 0.003071721 3.517517   0.0004356039</code></pre>
+</div>
+</div>
+</section>
+<section id="mapping-the-local-morans-i" class="level3">
+<h3 class="anchored" data-anchor-id="mapping-the-local-morans-i">Mapping the local Moran’s I</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>Thailand.localMI <span class="ot">&lt;-</span> <span class="fu">cbind</span>(Thailand_Map_Drug,localMI) <span class="sc">%&gt;%</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Pr.Ii =</span> Pr.z....E.Ii..)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using choropleth mapping functions of tmap package, we can plot the local Moran’s I values by using the code chinks below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(Thailand.localMI) <span class="sc">+</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">col =</span> <span class="st">"Ii"</span>, </span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">style =</span> <span class="st">"pretty"</span>,</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">palette =</span> <span class="st">"RdBu"</span>,</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"local moran statistics"</span>) <span class="sc">+</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Variable(s) "Ii" contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full spectrum of the color palette.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_ex02_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="mapping-local-morans-i-p-values" class="level3">
+<h3 class="anchored" data-anchor-id="mapping-local-morans-i-p-values">Mapping local Moran’s I p-values</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(Thailand.localMI) <span class="sc">+</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">col =</span> <span class="st">"Pr.Ii"</span>, </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">breaks=</span><span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="cn">Inf</span>),</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">palette=</span><span class="st">"-Blues"</span>, </span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="st">"local Moran's I p-values"</span>) <span class="sc">+</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">legend.width =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_ex02_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+</section>
 </section>
 </section>
 

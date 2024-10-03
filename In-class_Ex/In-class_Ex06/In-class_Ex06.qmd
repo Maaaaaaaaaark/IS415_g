@@ -12,26 +12,34 @@ execute:
 ---
 
 # Package download
+
 ```{r}
 pacman::p_load(sf,tmap,sfdep,tidyverse)
 ```
 
 # Data
+
 ## Importing data
+
 ```{r}
 hunan <- st_read(dsn = "data/geospatial", layer = "Hunan")
 ```
+
 ## Attribute data
+
 ```{r}
 hunan2012 <- read_csv("data/aspatial/hunan_2012.csv")
 ```
+
 ## Combining both data frame by using left join
+
 ```{r}
 hunan_GDPPC <-left_join(hunan,hunan2012)%>%
   select(1:4,7,15)
 ```
 
 # Deriving Queen's contiguity weights: sfdep methods
+
 ```{r}
 wm_q <- hunan_GDPPC %>%
   mutate(nb= st_contiguity(geometry),
@@ -39,12 +47,11 @@ wm_q <- hunan_GDPPC %>%
                         style ="W"),
          .before =1)
 ```
-nb: a neighbot list object as created by st_neighbors()
-style: w for row standardized
-allow_zero :if true, assigns zero as lagged valued to zone withour neighbors
-before =1: postition it to the first line
+
+nb: a neighbot list object as created by st_neighbors() style: w for row standardized allow_zero :if true, assigns zero as lagged valued to zone withour neighbors before =1: postition it to the first line
 
 # Computing Gloval Moran'I
+
 ```{r}
 moranI <- global_moran(wm_q$GDPPC,
                        wm_q$nb,
@@ -53,20 +60,27 @@ glimpse(moranI)
 ```
 
 # Performing gloval moran's I tset(comon)
+
 ```{r}
 global_moran_test(wm_q$GDPPC,
                   wm_q$nb,
                   wm_q$wt)
 ```
+
 # Performing Global Moran'I permutation test
 
 ## step 1
+
 This is to ensure that the computation is reproducible
+
 ```{r}
 set.seed(1234)
 ```
+
 ## step 2
+
 global_moran_perm is used to perform Monte Varlo simoulation
+
 ```{r}
 global_moran_perm(wm_q$GDPPC,
                   wm_q$nb,
@@ -75,7 +89,9 @@ global_moran_perm(wm_q$GDPPC,
 ```
 
 # Computing loacl Moran's I
+
 compute Local Moran's of GDPPC at country leve; by using local_moran() of sfdep package
+
 ```{r}
 lisa <- wm_q%>%
   mutate(local_moran = local_moran(
@@ -85,11 +101,10 @@ lisa <- wm_q%>%
   unnest(local_moran)
 ```
 
-which method should we use:
-if skewness  all close to 0 use median
-else use mean
+which method should we use: if skewness all close to 0 use median else use mean
 
 # visualising local moran's
+
 ```{r}
 tmap_mode("plot")
 map1 = tm_shape(lisa) +
@@ -109,6 +124,7 @@ tmap_arrange(map1, map2, ncol = 2)
 ```
 
 # Visualising Lisa map
+
 ```{r}
 lisa_sig <- lisa %>%
   filter(p_ii <0.05)
@@ -120,8 +136,11 @@ tm_shape(lisa)+
   tm_fill("mean")+
   tm_borders(alpha = 0.5)
 ```
-# hot spot and cold spot 
-## Computing local Gi* statistics
+
+# hot spot and cold spot
+
+## Computing local Gi\* statistics
+
 ```{r}
 wm_idw <- hunan_GDPPC %>%
   mutate(nb = st_contiguity(geometry),
@@ -139,7 +158,7 @@ HCSA <- wm_idw%>%
   unnest(local_Gi)
 HCSA
 ```
- 
+
 ```{r}
 HCSA_sig <- HCSA %>%
   filter(p_sim < 0.05)
@@ -151,6 +170,7 @@ tm_shape(HCSA_sig)+
   tm_fill("gi_star")+
   tm_borders(alpha = 0.4)
 ```
+
 ```{r}
 HCSA_sig <- HCSA %>%
   filter(p_sim < 0.05)

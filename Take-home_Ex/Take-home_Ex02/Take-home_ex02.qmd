@@ -16,7 +16,7 @@ execute:
 ## 1.0Setting the Analytical Tools
 
 ```{r}
-pacman::p_load(sf,spdep,tmap,tidyverse)
+pacman::p_load(sf,spdep,tmap,tidyverse,dplyr)
 ```
 
 ## 2.0 Getting the data into R Environment
@@ -73,4 +73,167 @@ tmap_arrange(equal,
              quantile)
 ```
 
-## 
+## 3.0 Global Measures of Spatial Autocorrelation
+
+### 3.1 Computing Contiguity Spatial Weights
+
+```{r}
+wm_q <- poly2nb(Thailand_Map_Drug, 
+                queen=TRUE)
+summary(wm_q)
+```
+
+The summary report above shows that there are 450 area units in Thailand. The most connected area unit has 12 neighbours. There are 6 area units with only 5 neighbours.
+
+## Row-standardised weights matrix
+
+```{r}
+rswm_q <- nb2listw(wm_q, 
+                   style="W", 
+                   zero.policy = TRUE)
+rswm_q
+```
+
+## Global Measures of Spatial Autocorrelation: Moran’s I
+
+### Maron’s I test
+
+```{r}
+moran.test(Thailand_Map_Drug$no_cases, 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+```
+
+The p-value is extremely small, suggesting that the result is highly significant.Moran I statistic, indicating the degree of positive spatial autocorrelation under the given weights. A positive value suggests that high-value areas tend to cluster together.The alternative hypothesi is greater indicates the alternative hypothesis, focusing on positive autocorrelation, meaning that areas with a high number of cases are likely to be adjacent to other areas with a high number of cases.
+
+### Computing Monte Carlo Moran’s I
+
+```{r}
+set.seed(1234)
+bperm= moran.mc(Thailand_Map_Drug$no_cases, 
+                listw=rswm_q, 
+                nsim=999, 
+                zero.policy = TRUE, 
+                na.action=na.omit)
+bperm
+```
+
+The output indicates strong evidence of positive spatial autocorrelation in the case numbers across the regions in Thailand.And the output of the p-value mean that it is not generate by random. The observed Moran's I value is significantly higher than what would be expected by chance, suggesting that regions with high case numbers are clustering together.
+
+### Visualising Monte Carlo Moran’s I
+
+```{r}
+hist(bperm$res, 
+     freq=TRUE, 
+     breaks=20, 
+     xlab="Simulated Moran's I")
+abline(v=0.15731, 
+       col="red") 
+```
+
+The histogram displays the distribution of simulated Moran's I values, most of which are close to zero.As fot the observed Moran's I (0.15731) is far greater than these simulated values, falling in the extreme right tail of the distribution, as shown in the histogram.The p-value (0.001) and the observed rank of 1000 indicate that this observed spatial autocorrelation is highly significant, confirming that drug use cases are spatially clustered in Thailand rather than randomly distributed.
+
+## Global Measures of Spatial Autocorrelation: Geary’s C
+
+### Geary’s C test
+
+```{r}
+geary.test(Thailand_Map_Drug$no_cases, listw=rswm_q)
+```
+
+The calculated Geary C statistic is 0.8915. This value is less than 1, indicating that the sample exhibits positive spatial autocorrelation, meaning that nearby areas tend to have similar case counts.The p-value is 2.814e-05 (or 0.00002814), which is very small and indicates that the result is statistically significant. Generally, if the p-value is less than 0.05, we can reject the null hypothesis, suggesting significant spatial autocorrelation exists.Overall, these results indicate that in the context of drug cases in Thailand, the spatial distribution of cases is not random but shows significant positive spatial autocorrelation.
+
+### Computing Monte Carlo Geary’s C
+
+```{r}
+set.seed(1234)
+bperm=geary.mc(Thailand_Map_Drug$no_cases, 
+               listw=rswm_q, 
+               nsim=999)
+bperm
+```
+
+The calculated Geary C statistic is 0.89154. This value indicates positive spatial autocorrelation in the sample, meaning that nearby areas tend to have similar case counts.The p-value is 0.001, which is very small and indicates that the result is statistically significant. Overall, these results suggest that in the context of drug cases in Thailand, the spatial distribution of cases is not random but shows significant positive spatial autocorrelation.
+
+### Visualising the Monte Carlo Geary’s C
+
+```{r}
+hist(bperm$res, freq=TRUE, breaks=20, xlab="Simulated Geary c")
+abline(v=0.89154, col="red") 
+```
+
+The observed spatial autocorrelation is stronger than what would be expected by random chance. This suggests that the distribution of cases is not random, indicating a clustering effect in your data. Overall, this aligns with your previous analysis, highlighting the presence of important spatial influencing factors in your dataset.
+
+## Spatial Correlogram
+
+### Compute Moran’s I correlogram
+
+```{r}
+MI_corr <- sp.correlogram(wm_q, 
+                          Thailand_Map_Drug$no_cases, 
+                          order=10, 
+                          method="I", 
+                          style="W",
+                          zero.policy = TRUE)
+plot(MI_corr)
+```
+
+Strong Autocorrelation Among First-Order Neighbors： The Moran's I value for first-order neighbors (order = 1) is approximately 0.15 in the Correlogram. This suggests that there is a spatial clustering effect in certain areas where the number of drug offenses is high, indicating that high-case areas are located close to each other. Decreasing Autocorrelation with Increased Distance: As increase the order of neighbors (for example, to order = 5), the Moran's I values in the Correlogram approach 0. This indicates that there is no significant spatial correlation among areas that are farther away from these clustered regions. In other words, as you move away from these high-case areas, the distribution of drug offenses becomes increasingly random.
+
+```{r}
+print(MI_corr)
+```
+
+### **Compute Geary’s C correlogram and plot**
+
+```{r}
+GC_corr <- sp.correlogram(wm_q, 
+                          Thailand_Map_Drug$no_cases, 
+                          order=10, 
+                          method="C", 
+                          style="W",
+                          zero.policy = TRUE)
+plot(GC_corr)
+```
+
+```{r}
+print(GC_corr)
+```
+
+In Moran's I results, the first-order neighbors show positive spatial autocorrelation. Similarly, the Geary's C results indicate that there is positive spatial autocorrelation at smaller lags. Both indicate that drug abuse cases are spatially clustered in local areas.\
+Moran's I approaches 0 as the lag number increases, which is consistent with the trend in Geary's C, i.e., spatial autocorrelation weakens as the lag increases. This suggests that areas farther from the clustered regions tend to be distributed randomly, and both statistics point to an insignificant global spatial autocorrelation.
+
+## Local Indicators of Spatial Association(LISA)
+
+### Computing local Moran’s I
+
+```{r}
+fips <- order(Thailand_Map_Drug$no_cases)
+localMI <- localmoran(Thailand_Map_Drug$no_cases, rswm_q)
+head(localMI)
+```
+### Mapping the local Moran’s I
+```{r}
+Thailand.localMI <- cbind(Thailand_Map_Drug,localMI) %>%
+  rename(Pr.Ii = Pr.z....E.Ii..)
+```
+Using choropleth mapping functions of tmap package, we can plot the local Moran’s I values by using the code chinks below.
+```{r}
+tm_shape(Thailand.localMI) +
+  tm_fill(col = "Ii", 
+          style = "pretty",
+          palette = "RdBu",
+          title = "local moran statistics") +
+  tm_borders(alpha = 0.5)
+```
+### Mapping local Moran’s I p-values
+```{r}
+tm_shape(Thailand.localMI) +
+  tm_fill(col = "Pr.Ii", 
+          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette="-Blues", 
+          title = "local Moran's I p-values") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.width = 0.5)
+```
