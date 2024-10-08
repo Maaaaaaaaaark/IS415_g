@@ -4,7 +4,7 @@ author: "Yuheng Liang"
 format: html
 editor: visual
 date: "September 24, 2024"
-date-modified: "Oct 1,2024"
+date-modified: "Oct 5,2024"
 execute: 
   eval: true
   echo: true
@@ -13,27 +13,27 @@ execute:
 
 # Take home exe2
 
-## 1.0Setting the Analytical Tools
+## Setting the Analytical Tools
 
 ```{r}
 pacman::p_load(sf,spdep,tmap,tidyverse,dplyr)
 ```
 
-## 2.0 Getting the data into R Environment
+## Getting the data into R Environment
 
-### 2.1 Import shapefile into r environment
+### Import shapefile into r environment
 
 ```{r}
 Thailand_Map <- st_read(dsn = "data/tha_adm_rtsd_itos_20210121_shp", layer = "tha_admbnda_adm1_rtsd_20220121" )
 ```
 
-### 2.2 Import. csv file into r environment
+### Import. csv file into r environment
 
 ```{r}
 Thailand <- read_csv("data/archive/thai_drug_offenses_2017_2022.csv")
 ```
 
-### 2.3 data marning
+### data marning
 
 left join the data
 
@@ -73,9 +73,9 @@ tmap_arrange(equal,
              quantile)
 ```
 
-## 3.0 Global Measures of Spatial Autocorrelation
+## Global Measures of Spatial Autocorrelation
 
-### 3.1 Computing Contiguity Spatial Weights
+### Computing Contiguity Spatial Weights
 
 ```{r}
 wm_q <- poly2nb(Thailand_Map_Drug, 
@@ -185,7 +185,7 @@ Strong Autocorrelation Among First-Order Neighbors： The Moran's I value for fi
 print(MI_corr)
 ```
 
-### **Compute Geary’s C correlogram and plot**
+### Compute Geary’s C correlogram and plot
 
 ```{r}
 GC_corr <- sp.correlogram(wm_q, 
@@ -213,27 +213,228 @@ fips <- order(Thailand_Map_Drug$no_cases)
 localMI <- localmoran(Thailand_Map_Drug$no_cases, rswm_q)
 head(localMI)
 ```
+
 ### Mapping the local Moran’s I
+
 ```{r}
 Thailand.localMI <- cbind(Thailand_Map_Drug,localMI) %>%
   rename(Pr.Ii = Pr.z....E.Ii..)
 ```
-Using choropleth mapping functions of tmap package, we can plot the local Moran’s I values by using the code chinks below.
+
+### Mapping both local Moran’s I values and p-values
+
 ```{r}
-tm_shape(Thailand.localMI) +
+localMI.map <- tm_shape(Thailand.localMI) +
   tm_fill(col = "Ii", 
-          style = "pretty",
-          palette = "RdBu",
+          style = "pretty", 
           title = "local moran statistics") +
   tm_borders(alpha = 0.5)
-```
-### Mapping local Moran’s I p-values
-```{r}
-tm_shape(Thailand.localMI) +
+
+pvalue.map <- tm_shape(Thailand.localMI) +
   tm_fill(col = "Pr.Ii", 
           breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
           palette="-Blues", 
           title = "local Moran's I p-values") +
-  tm_borders(alpha = 0.5) +
-  tm_layout(legend.width = 0.5)
+  tm_borders(alpha = 0.5)
+
+tmap_arrange(localMI.map, pvalue.map, asp=1, ncol=2)
+```
+
+The left map shows the strength and direction of spatial correlation (positive or negative), while the right map assesses whether these correlations are statistically significant. Areas with strong positive Moran's I values (green zones) in the left map often correspond to dark blue regions in the right map, indicating significant "hot spots" of drug abuse. The areas with lower Moran’s I values (e.g., near zero or negative in the left map) are often associated with higher p-values in the right map, suggesting that the clustering in these areas is not statistically significant and could be due to random variation.
+
+## Creating a LISA Cluster Map
+
+### Plotting Moran scatterplot
+
+```{r}
+nci <- moran.plot(Thailand_Map_Drug$no_cases, rswm_q,
+                  labels=as.character(Thailand_Map_Drug$ADM1_EN), 
+                  xlab="Drug", 
+                  ylab="Spatially Lag Drug")
+```
+
+### Plotting Moran scatterplot with standardised variable
+
+```{r}
+Thailand_Map_Drug$Z.no_case <- scale(Thailand_Map_Drug$no_cases) %>% 
+  as.vector 
+```
+
+plot the Moran scatterplot
+
+```{r}
+nci2 <- moran.plot(Thailand_Map_Drug$Z.no_case, rswm_q,
+                   labels=as.character(Thailand_Map_Drug$ADM1_EN),
+                   xlab="Z-drug", 
+                   ylab="Spatially Lag z-drug")
+```
+
+Top-right quadrant (High-High): Regions in this quadrant (like Bangkok) have high values of drug use cases and are surrounded by neighboring regions that also have high values. This suggests positive spatial autocorrelation (clusters of high drug use). Bottom-left quadrant (Low-Low): Regions here have low values and are surrounded by regions with low values, indicating similar positive spatial autocorrelation for areas with low drug use. Top-left quadrant (Low-High): These regions have low drug use cases but are surrounded by areas with high cases. This suggests negative spatial autocorrelation (disparities between neighboring regions). Bottom-right quadrant (High-Low): These regions have high drug use cases but are surrounded by areas with low cases, also indicating negative spatial autocorrelation. Regions labeled: Some regions, such as Bangkok, Samut Prakan, and Nonthaburi, are labeled in the plot because they show distinct spatial patterns. Bangkok, for instance, appears in the top-right quadrant, meaning it has a high number of cases and is surrounded by other regions with high values.
+
+## Preparing LISA map classes
+
+```{r}
+quadrant <- vector(mode="numeric",length=nrow(localMI))
+```
+
+```{r}
+Thailand_Map_Drug$lag_GDPPC <- lag.listw(rswm_q, Thailand_Map_Drug$no_cases)
+DV <- Thailand_Map_Drug$lag_GDPPC - mean(Thailand_Map_Drug$lag_GDPPC)     
+```
+
+```{r}
+LM_I <- localMI[,1] - mean(localMI[,1])    
+```
+
+```{r}
+signif <- 0.05       
+```
+
+```{r}
+quadrant[DV <0 & LM_I>0] <- 1
+quadrant[DV >0 & LM_I<0] <- 2
+quadrant[DV <0 & LM_I<0] <- 3  
+quadrant[DV >0 & LM_I>0] <- 4      
+```
+
+```{r}
+quadrant[localMI[,5]>signif] <- 0
+```
+
+```{r}
+quadrant <- vector(mode="numeric",length=nrow(localMI))
+Thailand_Map_Drug$lag_GDPPC <- lag.listw(rswm_q, Thailand_Map_Drug$no_cases)
+DV <- Thailand_Map_Drug$lag_GDPPC - mean(Thailand_Map_Drug$lag_GDPPC)     
+LM_I <- localMI[,1]   
+signif <- 0.05       
+quadrant[DV <0 & LM_I>0] <- 1
+quadrant[DV >0 & LM_I<0] <- 2
+quadrant[DV <0 & LM_I<0] <- 3  
+quadrant[DV >0 & LM_I>0] <- 4    
+quadrant[localMI[,5]>signif] <- 0
+```
+
+plot it
+
+```{r}
+Thailand_Map_Drug <- Thailand_Map_Drug %>%
+  mutate(cases_group = cut(no_cases, 
+                            breaks = seq(0, max(no_cases, na.rm = TRUE), by = 1000), 
+                            include.lowest = TRUE,
+                            right = FALSE))
+no_cases_map <- qtm(Thailand_Map_Drug, "cases_group")
+```
+
+```{r}
+Thailand.localMI$quadrant <- quadrant
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
+LISAmap <- tm_shape(Thailand.localMI) +
+  tm_fill(col = "quadrant", 
+          style = "cat", 
+          palette = colors[c(sort(unique(quadrant)))+1], 
+          labels = clusters[c(sort(unique(quadrant)))+1],
+          popup.vars = c("")) +
+  tm_view(set.zoom.limits = c(11,17)) +
+  tm_borders(alpha=0.5)
+
+tmap_arrange(no_cases_map, LISAmap, 
+             asp=1, ncol=2)
+```
+
+## Hot Spot and Cold Spot Area Analysis
+
+### Deriving distance-based weight matrix
+
+#### Deriving the centroid
+
+```{r}
+longitude <- map_dbl(Thailand_Map_Drug$geometry, ~st_centroid(.x)[[1]])
+```
+
+```{r}
+latitude <- map_dbl(Thailand_Map_Drug$geometry, ~st_centroid(.x)[[2]])
+```
+
+```{r}
+coords <- cbind(longitude, latitude)
+```
+
+#### Determine the cut-off distance
+
+dealing with the point
+
+```{r}
+coords_unique <- unique(coords)
+```
+
+```{r}
+#coords <- coordinates(hunan)
+k1 <- knn2nb(knearneigh(coords_unique, k = 5)) # Increase k as needed
+k1dists <- unlist(nbdists(k1, coords_unique, longlat = TRUE))
+summary(k1dists)
+```
+
+The fact that the mean distance (96.47) is higher than the median distance (89.67) suggests a right-skewed distribution, meaning that while many points are close to each other, there are some outliers that are significantly further apart.
+
+#### Computing fixed distance weight matrix
+
+```{r}
+wm_d234 <- dnearneigh(coords, 0, 234, longlat = TRUE)
+wm_d234
+```
+
+Next, nb2listw() is used to convert the nb object into spatial weights object.
+
+```{r}
+wm234_lw <- nb2listw(wm_d234, style = 'B')
+summary(wm234_lw)
+```
+
+### Computing adaptive distance weight matrix
+
+```{r}
+knn <- knn2nb(knearneigh(coords, k=8))
+knn
+```
+
+convert the nb object into spatial weights object.
+
+```{r}
+knn_lw <- nb2listw(knn, style = 'B')
+summary(knn_lw)
+```
+
+## Computing Gi statistics
+
+### Gi statistics using fixed distance
+
+```{r}
+fips <- order(Thailand_Map_Drug$ADM1_EN)
+gi.fixed <- localG(Thailand_Map_Drug$no_cases, wm234_lw)
+gi.fixed
+```
+
+```{r}
+Thailand.gi <- cbind(Thailand_Map_Drug, as.matrix(gi.fixed)) %>%
+  rename(gstat_fixed = as.matrix.gi.fixed.)
+```
+
+```{r}
+Thailand_Map_Drug <- Thailand_Map_Drug %>%
+  mutate(cases_group = cut(no_cases, 
+                            breaks = seq(0, max(no_cases, na.rm = TRUE), by = 1000), 
+                            include.lowest = TRUE,
+                            right = FALSE))
+no_cases_map <- qtm(Thailand_Map_Drug, "cases_group")
+
+Gimap <-tm_shape(Thailand.gi) +
+  tm_fill(col = "gstat_fixed", 
+          style = "pretty",
+          palette="-RdBu",
+          title = "local Gi") +
+  tm_borders(alpha = 0.5)
+
+tmap_arrange(no_cases_map, Gimap, asp=1, ncol=2)
 ```
