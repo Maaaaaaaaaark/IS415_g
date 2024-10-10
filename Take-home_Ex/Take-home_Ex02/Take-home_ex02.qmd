@@ -4,7 +4,7 @@ author: "Yuheng Liang"
 format: html
 editor: visual
 date: "September 24, 2024"
-date-modified: "Oct 5,2024"
+date-modified: "Oct 10,2024"
 execute: 
   eval: true
   echo: true
@@ -16,7 +16,7 @@ execute:
 ## Setting the Analytical Tools
 
 ```{r}
-pacman::p_load(sf,spdep,tmap,tidyverse,dplyr)
+pacman::p_load(sf,spdep,tmap,tidyverse,dplyr,sfdep)
 ```
 
 ## Getting the data into R Environment
@@ -25,6 +25,14 @@ pacman::p_load(sf,spdep,tmap,tidyverse,dplyr)
 
 ```{r}
 Thailand_Map <- st_read(dsn = "data/tha_adm_rtsd_itos_20210121_shp", layer = "tha_admbnda_adm1_rtsd_20220121" )
+```
+
+```{r}
+st_crs(Thailand_Map)
+```
+
+```{r}
+st_transform(Thailand_Map, crs = 32647)
 ```
 
 ### Import. csv file into r environment
@@ -38,39 +46,55 @@ Thailand <- read_csv("data/archive/thai_drug_offenses_2017_2022.csv")
 left join the data
 
 ```{r}
+Thailand = Thailand %>%
+  pivot_wider(names_from = types_of_drug_offenses, values_from = no_cases) %>%
+  mutate(`Total` = rowSums(.[4:19]))
+```
+
+```{r}
 Thailand_Map_Drug <- left_join(Thailand_Map, Thailand, by = c("ADM1_EN" = "province_en"))%>%
-  select(3,17,18,19,21)
+  dplyr::select(1:3, 17,19:36)
 ```
 
-flit the drug abuse data
+flit the drug abuse data by year
 
 ```{r}
-unique(Thailand_Map_Drug$types_of_drug_offenses)
-```
-
-```{r}
-Thailand_Map_Drug <- subset(Thailand_Map_Drug, types_of_drug_offenses == "drug_use_cases")
+Drug2017 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2017")
+Drug2018 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2018")
+Drug2019 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2019")
+Drug2020 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2020")
+Drug2021 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2021")
+Drug2022 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2022")
 ```
 
 Visualising the data
 
 ```{r}
-equal <- tm_shape(Thailand_Map_Drug) +
-  tm_fill("no_cases",
-          n = 5,
-          style = "equal") +
-  tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "interval classification",legend.width = 0.5)
-
-quantile <- tm_shape(Thailand_Map_Drug) +
-  tm_fill("no_cases",
-          n = 5,
-          style = "quantile") +
-  tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "quantile classification",legend.width = 0.5)
-
-tmap_arrange(equal, 
-             quantile)
+quantile2017 = tm_shape(Drug2017) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2018 = tm_shape(Drug2018) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2019 = tm_shape(Drug2019) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2020 = tm_shape(Drug2020) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2021 = tm_shape(Drug2021) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2022 = tm_shape(Drug2022) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+tmap_arrange(quantile2017,quantile2018,quantile2019,quantile2020,quantile2021,quantile2022,ncol = 2)
 ```
 
 ## Global Measures of Spatial Autocorrelation
@@ -78,363 +102,487 @@ tmap_arrange(equal,
 ### Computing Contiguity Spatial Weights
 
 ```{r}
-wm_q <- poly2nb(Thailand_Map_Drug, 
-                queen=TRUE)
-summary(wm_q)
+wm_q2017 = Drug2017 %>%
+  mutate(nb = st_contiguity(geometry),
+         .before = 1)
 ```
 
-The summary report above shows that there are 450 area units in Thailand. The most connected area unit has 12 neighbours. There are 6 area units with only 5 neighbours.
-
-## Row-standardised weights matrix
+```{r}
+str(wm_q2017)
+```
 
 ```{r}
-rswm_q <- nb2listw(wm_q, 
-                   style="W", 
-                   zero.policy = TRUE)
-rswm_q
+Drug2017_buffered <- st_buffer(Drug2017, dist = 1000) 
+wm_q2017 <- Drug2017_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+summary(wm_q2017)
+```
+
+```{r}
+Drug2018_buffered <- st_buffer(Drug2018, dist = 1000) 
+wm_q2018 <- Drug2018_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2019_buffered <- st_buffer(Drug2019, dist = 1000) 
+wm_q2019 <- Drug2019_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2020_buffered <- st_buffer(Drug2020, dist = 1000) 
+wm_q2020 <- Drug2020_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2021_buffered <- st_buffer(Drug2021, dist = 1000) 
+wm_q2021 <- Drug2021_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2022_buffered <- st_buffer(Drug2022, dist = 1000) 
+wm_q2022 <- Drug2022_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
 ```
 
 ## Global Measures of Spatial Autocorrelation: Moran’s I
 
 ### Maron’s I test
 
+2017
+
 ```{r}
-moran.test(Thailand_Map_Drug$no_cases, 
-           listw=rswm_q, 
-           zero.policy = TRUE, 
-           na.action=na.omit)
+moranI2017 <- global_moran(wm_q2017$Total,
+                       wm_q2017$nb,
+                       wm_q2017$wt)
+glimpse(moranI2017)
 ```
 
-The p-value is extremely small, suggesting that the result is highly significant.Moran I statistic, indicating the degree of positive spatial autocorrelation under the given weights. A positive value suggests that high-value areas tend to cluster together.The alternative hypothesi is greater indicates the alternative hypothesis, focusing on positive autocorrelation, meaning that areas with a high number of cases are likely to be adjacent to other areas with a high number of cases.
+```{r}
+global_moran_test(wm_q2017$Total,
+                       wm_q2017$nb,
+                       wm_q2017$wt)
+```
+The positive Moran's I value indicates a moderate degree of clustering of drug cases.
+The p-value (0.01643)meaning there is a significant positive autocorrelation of drug cases in 2017.
+```{r}
+moranI2018 <- global_moran(wm_q2018$Total,
+                       wm_q2018$nb,
+                       wm_q2018$wt)
+glimpse(moranI2018)
+```
 
-### Computing Monte Carlo Moran’s I
+```{r}
+global_moran_test(wm_q2018$Total,
+                       wm_q2018$nb,
+                       wm_q2018$wt)
+```
 
+Moran’s I slightly decreases to 0.105375571, with a p-value of 0.004180372 Though the value is lower than in 2017, there is still significant positive spatial autocorrelation.
+
+2019
+
+```{r}
+moranI2019 <- global_moran(wm_q2019$Total,
+                       wm_q2019$nb,
+                       wm_q2019$wt)
+glimpse(moranI2019)
+```
+
+```{r}
+global_moran_test(wm_q2019$Total,
+                       wm_q2019$nb,
+                       wm_q2019$wt)
+```
+The clustering continues, though slightly weaker than in 2017.
+The p-value (0.03297) indicates that the result is still statistically significant, implying that similar values are still more likely to be found near each other.
+
+2020
+
+```{r}
+moranI2020 <- global_moran(wm_q2020$Total,
+                       wm_q2020$nb,
+                       wm_q2020$wt)
+glimpse(moranI2020)
+```
+
+```{r}
+global_moran_test(wm_q2020$Total,
+                       wm_q2020$nb,
+                       wm_q2020$wt)
+```
+The clustering strength decreased slightly compared to 2019 but remains significant.
+The p-value shows that the clustering is statistically significant.
+
+2021
+
+```{r}
+moranI2021 <- global_moran(wm_q2021$Total,
+                       wm_q2021$nb,
+                       wm_q2021$wt)
+glimpse(moranI2021)
+```
+
+```{r}
+global_moran_test(wm_q2021$Total,
+                       wm_q2021$nb,
+                       wm_q2021$wt)
+```
+This year shows a notable increase in clustering compared to previous years, indicating a higher concentration of drug cases in certain areas.
+The p-value indicates a very strong statistical significance.
+
+2022
+
+```{r}
+moranI2022 <- global_moran(wm_q2022$Total,
+                       wm_q2022$nb,
+                       wm_q2022$wt)
+glimpse(moranI2022)
+```
+
+```{r}
+global_moran_test(wm_q2022$Total,
+                       wm_q2022$nb,
+                       wm_q2022$wt)
+```
+The highest Moran's I value recorded, indicating even stronger clustering of drug cases compared to all previous years.
+The extremely low p-value confirms that this result is highly statistically significant.
+
+Over the years from 2017 to 2022, the strength of spatial autocorrelation in drug cases has generally increased, indicating a trend toward greater clustering.
+The significant p-values across the years suggest that similar drug case counts are consistently found in geographically close areas.
+The increasing Moran's I values could suggest that the distribution of drug cases is becoming more concentrated in specific regions over time.
+
+### Performing Global Moran’I permutation test
+2017
 ```{r}
 set.seed(1234)
-bperm= moran.mc(Thailand_Map_Drug$no_cases, 
-                listw=rswm_q, 
-                nsim=999, 
-                zero.policy = TRUE, 
-                na.action=na.omit)
-bperm
+global_moran_perm(wm_q2017$Total,
+                       wm_q2017$nb,
+                       wm_q2017$wt,
+                  nsim = 99)
 ```
-
-The output indicates strong evidence of positive spatial autocorrelation in the case numbers across the regions in Thailand.And the output of the p-value mean that it is not generate by random. The observed Moran's I value is significantly higher than what would be expected by chance, suggesting that regions with high case numbers are clustering together.
-
-### Visualising Monte Carlo Moran’s I
-
-```{r}
-hist(bperm$res, 
-     freq=TRUE, 
-     breaks=20, 
-     xlab="Simulated Moran's I")
-abline(v=0.15731, 
-       col="red") 
-```
-
-The histogram displays the distribution of simulated Moran's I values, most of which are close to zero.As fot the observed Moran's I (0.15731) is far greater than these simulated values, falling in the extreme right tail of the distribution, as shown in the histogram.The p-value (0.001) and the observed rank of 1000 indicate that this observed spatial autocorrelation is highly significant, confirming that drug use cases are spatially clustered in Thailand rather than randomly distributed.
-
-## Global Measures of Spatial Autocorrelation: Geary’s C
-
-### Geary’s C test
-
-```{r}
-geary.test(Thailand_Map_Drug$no_cases, listw=rswm_q)
-```
-
-The calculated Geary C statistic is 0.8915. This value is less than 1, indicating that the sample exhibits positive spatial autocorrelation, meaning that nearby areas tend to have similar case counts.The p-value is 2.814e-05 (or 0.00002814), which is very small and indicates that the result is statistically significant. Generally, if the p-value is less than 0.05, we can reject the null hypothesis, suggesting significant spatial autocorrelation exists.Overall, these results indicate that in the context of drug cases in Thailand, the spatial distribution of cases is not random but shows significant positive spatial autocorrelation.
-
-### Computing Monte Carlo Geary’s C
-
+2018
 ```{r}
 set.seed(1234)
-bperm=geary.mc(Thailand_Map_Drug$no_cases, 
-               listw=rswm_q, 
-               nsim=999)
-bperm
+global_moran_perm(wm_q2018$Total,
+                       wm_q2018$nb,
+                       wm_q2018$wt,
+                  nsim = 99)
 ```
-
-The calculated Geary C statistic is 0.89154. This value indicates positive spatial autocorrelation in the sample, meaning that nearby areas tend to have similar case counts.The p-value is 0.001, which is very small and indicates that the result is statistically significant. Overall, these results suggest that in the context of drug cases in Thailand, the spatial distribution of cases is not random but shows significant positive spatial autocorrelation.
-
-### Visualising the Monte Carlo Geary’s C
-
+2019
 ```{r}
-hist(bperm$res, freq=TRUE, breaks=20, xlab="Simulated Geary c")
-abline(v=0.89154, col="red") 
+set.seed(1234)
+global_moran_perm(wm_q2019$Total,
+                       wm_q2019$nb,
+                       wm_q2019$wt,
+                  nsim = 99)
 ```
 
-The observed spatial autocorrelation is stronger than what would be expected by random chance. This suggests that the distribution of cases is not random, indicating a clustering effect in your data. Overall, this aligns with your previous analysis, highlighting the presence of important spatial influencing factors in your dataset.
+2020
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2020$Total,
+                       wm_q2020$nb,
+                       wm_q2020$wt,
+                  nsim = 99)
+```
+2021
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2021$Total,
+                       wm_q2021$nb,
+                       wm_q2021$wt,
+                  nsim = 99)
+```
 
-## Spatial Correlogram
+2022
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2022$Total,
+                       wm_q2022$nb,
+                       wm_q2022$wt,
+                  nsim = 99)
+```
+Change in Moran's I Statistic:
+
+From 2017 to 2022, the Moran's I statistic shows an overall increasing trend, rising from 0.12305 to 0.24112. This suggests a growing spatial clustering of drug cases over this period.
+Change in p-values:
+
+From 2017 to 2020, the p-values are relatively high (greater than 0.05), indicating insufficient evidence to suggest significant spatial autocorrelation of drug cases. However, in 2021 and 2022, the p-values notably decrease, especially in 2022, where the p-value is less than 0.05, indicating significant spatial autocorrelation in drug cases during these years.
+Observed Ranks:
+
+The observed ranks are consistently around 90 to 100 each year, with 2022 reaching a rank of 100, indicating that the Moran's I statistic for that year performed best among all simulations, showcasing the strongest spatial clustering.
+
+
+## Lisa Map
 
 ### Compute Moran’s I correlogram
 
 ```{r}
-MI_corr <- sp.correlogram(wm_q, 
-                          Thailand_Map_Drug$no_cases, 
-                          order=10, 
-                          method="I", 
-                          style="W",
-                          zero.policy = TRUE)
-plot(MI_corr)
-```
-
-Strong Autocorrelation Among First-Order Neighbors： The Moran's I value for first-order neighbors (order = 1) is approximately 0.15 in the Correlogram. This suggests that there is a spatial clustering effect in certain areas where the number of drug offenses is high, indicating that high-case areas are located close to each other. Decreasing Autocorrelation with Increased Distance: As increase the order of neighbors (for example, to order = 5), the Moran's I values in the Correlogram approach 0. This indicates that there is no significant spatial correlation among areas that are farther away from these clustered regions. In other words, as you move away from these high-case areas, the distribution of drug offenses becomes increasingly random.
-
-```{r}
-print(MI_corr)
-```
-
-### Compute Geary’s C correlogram and plot
-
-```{r}
-GC_corr <- sp.correlogram(wm_q, 
-                          Thailand_Map_Drug$no_cases, 
-                          order=10, 
-                          method="C", 
-                          style="W",
-                          zero.policy = TRUE)
-plot(GC_corr)
+lisa2017 <- wm_q2017 %>% 
+  mutate(local_moran = local_moran(
+    Drug2017$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
 ```
 
 ```{r}
-print(GC_corr)
-```
-
-In Moran's I results, the first-order neighbors show positive spatial autocorrelation. Similarly, the Geary's C results indicate that there is positive spatial autocorrelation at smaller lags. Both indicate that drug abuse cases are spatially clustered in local areas.\
-Moran's I approaches 0 as the lag number increases, which is consistent with the trend in Geary's C, i.e., spatial autocorrelation weakens as the lag increases. This suggests that areas farther from the clustered regions tend to be distributed randomly, and both statistics point to an insignificant global spatial autocorrelation.
-
-## Local Indicators of Spatial Association(LISA)
-
-### Computing local Moran’s I
-
-```{r}
-fips <- order(Thailand_Map_Drug$no_cases)
-localMI <- localmoran(Thailand_Map_Drug$no_cases, rswm_q)
-head(localMI)
-```
-
-### Mapping the local Moran’s I
-
-```{r}
-Thailand.localMI <- cbind(Thailand_Map_Drug,localMI) %>%
-  rename(Pr.Ii = Pr.z....E.Ii..)
-```
-
-### Mapping both local Moran’s I values and p-values
-
-```{r}
-localMI.map <- tm_shape(Thailand.localMI) +
-  tm_fill(col = "Ii", 
-          style = "pretty", 
-          title = "local moran statistics") +
-  tm_borders(alpha = 0.5)
-
-pvalue.map <- tm_shape(Thailand.localMI) +
-  tm_fill(col = "Pr.Ii", 
-          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
-          palette="-Blues", 
-          title = "local Moran's I p-values") +
-  tm_borders(alpha = 0.5)
-
-tmap_arrange(localMI.map, pvalue.map, asp=1, ncol=2)
-```
-
-The left map shows the strength and direction of spatial correlation (positive or negative), while the right map assesses whether these correlations are statistically significant. Areas with strong positive Moran's I values (green zones) in the left map often correspond to dark blue regions in the right map, indicating significant "hot spots" of drug abuse. The areas with lower Moran’s I values (e.g., near zero or negative in the left map) are often associated with higher p-values in the right map, suggesting that the clustering in these areas is not statistically significant and could be due to random variation.
-
-## Creating a LISA Cluster Map
-
-### Plotting Moran scatterplot
-
-```{r}
-nci <- moran.plot(Thailand_Map_Drug$no_cases, rswm_q,
-                  labels=as.character(Thailand_Map_Drug$ADM1_EN), 
-                  xlab="Drug", 
-                  ylab="Spatially Lag Drug")
-```
-
-### Plotting Moran scatterplot with standardised variable
-
-```{r}
-Thailand_Map_Drug$Z.no_case <- scale(Thailand_Map_Drug$no_cases) %>% 
-  as.vector 
-```
-
-plot the Moran scatterplot
-
-```{r}
-nci2 <- moran.plot(Thailand_Map_Drug$Z.no_case, rswm_q,
-                   labels=as.character(Thailand_Map_Drug$ADM1_EN),
-                   xlab="Z-drug", 
-                   ylab="Spatially Lag z-drug")
-```
-
-Top-right quadrant (High-High): Regions in this quadrant (like Bangkok) have high values of drug use cases and are surrounded by neighboring regions that also have high values. This suggests positive spatial autocorrelation (clusters of high drug use). Bottom-left quadrant (Low-Low): Regions here have low values and are surrounded by regions with low values, indicating similar positive spatial autocorrelation for areas with low drug use. Top-left quadrant (Low-High): These regions have low drug use cases but are surrounded by areas with high cases. This suggests negative spatial autocorrelation (disparities between neighboring regions). Bottom-right quadrant (High-Low): These regions have high drug use cases but are surrounded by areas with low cases, also indicating negative spatial autocorrelation. Regions labeled: Some regions, such as Bangkok, Samut Prakan, and Nonthaburi, are labeled in the plot because they show distinct spatial patterns. Bangkok, for instance, appears in the top-right quadrant, meaning it has a high number of cases and is surrounded by other regions with high values.
-
-## Preparing LISA map classes
-
-```{r}
-quadrant <- vector(mode="numeric",length=nrow(localMI))
+lisa2018 <- wm_q2018 %>% 
+  mutate(local_moran = local_moran(
+    Drug2018$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
 ```
 
 ```{r}
-Thailand_Map_Drug$lag_GDPPC <- lag.listw(rswm_q, Thailand_Map_Drug$no_cases)
-DV <- Thailand_Map_Drug$lag_GDPPC - mean(Thailand_Map_Drug$lag_GDPPC)     
+lisa2019 <- wm_q2019 %>% 
+  mutate(local_moran = local_moran(
+    Drug2019$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
 ```
 
 ```{r}
-LM_I <- localMI[,1] - mean(localMI[,1])    
+lisa2020 <- wm_q2020 %>% 
+  mutate(local_moran = local_moran(
+    Drug2020$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
 ```
 
 ```{r}
-signif <- 0.05       
+lisa2021 <- wm_q2021 %>% 
+  mutate(local_moran = local_moran(
+    Drug2021$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
 ```
 
 ```{r}
-quadrant[DV <0 & LM_I>0] <- 1
-quadrant[DV >0 & LM_I<0] <- 2
-quadrant[DV <0 & LM_I<0] <- 3  
-quadrant[DV >0 & LM_I>0] <- 4      
+lisa2022 <- wm_q2022 %>% 
+  mutate(local_moran = local_moran(
+    Drug2022$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
 ```
 
+### Visualising local Moran’s I and p-value
+
+2017
 ```{r}
-quadrant[localMI[,5]>signif] <- 0
-```
+tmap_mode("plot")
+map1 <- tm_shape(lisa2017) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2017",
+            main.title.size = 0.8)
 
+map2 <- tm_shape(lisa2017) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2017",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+2018
 ```{r}
-quadrant <- vector(mode="numeric",length=nrow(localMI))
-Thailand_Map_Drug$lag_GDPPC <- lag.listw(rswm_q, Thailand_Map_Drug$no_cases)
-DV <- Thailand_Map_Drug$lag_GDPPC - mean(Thailand_Map_Drug$lag_GDPPC)     
-LM_I <- localMI[,1]   
-signif <- 0.05       
-quadrant[DV <0 & LM_I>0] <- 1
-quadrant[DV >0 & LM_I<0] <- 2
-quadrant[DV <0 & LM_I<0] <- 3  
-quadrant[DV >0 & LM_I>0] <- 4    
-quadrant[localMI[,5]>signif] <- 0
+tmap_mode("plot")
+map1 <- tm_shape(lisa2018) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2018",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2018) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2018",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
 ```
-
-plot it
-
+2019
 ```{r}
-Thailand_Map_Drug <- Thailand_Map_Drug %>%
-  mutate(cases_group = cut(no_cases, 
-                            breaks = seq(0, max(no_cases, na.rm = TRUE), by = 1000), 
-                            include.lowest = TRUE,
-                            right = FALSE))
-no_cases_map <- qtm(Thailand_Map_Drug, "cases_group")
-```
+tmap_mode("plot")
+map1 <- tm_shape(lisa2019) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2019",
+            main.title.size = 0.8)
 
+map2 <- tm_shape(lisa2019) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2019",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+2020
 ```{r}
-Thailand.localMI$quadrant <- quadrant
-colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
-clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+tmap_mode("plot")
+map1 <- tm_shape(lisa2020) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2020",
+            main.title.size = 0.8)
 
-LISAmap <- tm_shape(Thailand.localMI) +
-  tm_fill(col = "quadrant", 
-          style = "cat", 
-          palette = colors[c(sort(unique(quadrant)))+1], 
-          labels = clusters[c(sort(unique(quadrant)))+1],
-          popup.vars = c("")) +
-  tm_view(set.zoom.limits = c(11,17)) +
-  tm_borders(alpha=0.5)
+map2 <- tm_shape(lisa2020) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2020",
+            main.title.size = 0.8)
 
-tmap_arrange(no_cases_map, LISAmap, 
-             asp=1, ncol=2)
+tmap_arrange(map1, map2, ncol = 2)
 ```
-
-## Hot Spot and Cold Spot Area Analysis
-
-### Deriving distance-based weight matrix
-
-#### Deriving the centroid
-
+2021
 ```{r}
-longitude <- map_dbl(Thailand_Map_Drug$geometry, ~st_centroid(.x)[[1]])
-```
+tmap_mode("plot")
+map1 <- tm_shape(lisa2021) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2021",
+            main.title.size = 0.8)
 
+map2 <- tm_shape(lisa2021) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2021",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+2022
 ```{r}
-latitude <- map_dbl(Thailand_Map_Drug$geometry, ~st_centroid(.x)[[2]])
-```
+tmap_mode("plot")
+map1 <- tm_shape(lisa2022) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2022",
+            main.title.size = 0.8)
 
+map2 <- tm_shape(lisa2022) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2022",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+### Plotting LISA map
 ```{r}
-coords <- cbind(longitude, latitude)
+lisa_sig2017 <- lisa2017  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2017) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2017) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2018 <- lisa2018  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2018) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2018) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2019 <- lisa2019  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2019) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2019) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+
+lisa_sig2020 <- lisa2020  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2020) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2020) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2021 <- lisa2021  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2021) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2021) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2022 <- lisa2022  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2022) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2022) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
 ```
 
-#### Determine the cut-off distance
+## Analysis
+Drug trends from 2017 to 2022
+Spatial autocorrelation: from 2017 to 2020, statistic shows a yearly increasing trend, which suggests a stronger spatial clustering of the distribution of drug cases over this period. High Moran's I values imply that drug cases may be more concentrated in certain areas.(e.g. areas close to the Golden Triangle)
+Changes in 2021 and 2022
+Declining Moran's I values: in 2021 and 2022, while Moran's I values still exhibit spatial autocorrelation, they decline compared to previous years.This is analyzed below:
+1 Impact of drug legalization
+Legalization of Medical Marijuana: In 2021, Thailand became the first country in Southeast Asia to legalize medical marijuana. The implementation of this policy may have changed public attitudes towards drugs and reduced the demand for other illegal drugs. Legalization may entice some consumers to turn to legalized marijuana products, reducing demand for traditional drugs (e.g., heroin, methamphetamine, etc.).
+2. Impact of the epidemic
+COVID-19 Epidemic: Social closures and travel restrictions during an epidemic may lead to a decrease in the drug trade, particularly a slowdown in international drug smuggling. Closed social environments and economic pressures may have prompted some populations to reduce their use of drugs.
 
-dealing with the point
-
-```{r}
-coords_unique <- unique(coords)
-```
-
-```{r}
-#coords <- coordinates(hunan)
-k1 <- knn2nb(knearneigh(coords_unique, k = 5)) # Increase k as needed
-k1dists <- unlist(nbdists(k1, coords_unique, longlat = TRUE))
-summary(k1dists)
-```
-
-The fact that the mean distance (96.47) is higher than the median distance (89.67) suggests a right-skewed distribution, meaning that while many points are close to each other, there are some outliers that are significantly further apart.
-
-#### Computing fixed distance weight matrix
-
-```{r}
-wm_d234 <- dnearneigh(coords, 0, 234, longlat = TRUE)
-wm_d234
-```
-
-Next, nb2listw() is used to convert the nb object into spatial weights object.
-
-```{r}
-wm234_lw <- nb2listw(wm_d234, style = 'B')
-summary(wm234_lw)
-```
-
-### Computing adaptive distance weight matrix
-
-```{r}
-knn <- knn2nb(knearneigh(coords, k=8))
-knn
-```
-
-convert the nb object into spatial weights object.
-
-```{r}
-knn_lw <- nb2listw(knn, style = 'B')
-summary(knn_lw)
-```
-
-## Computing Gi statistics
-
-### Gi statistics using fixed distance
-
-```{r}
-fips <- order(Thailand_Map_Drug$ADM1_EN)
-gi.fixed <- localG(Thailand_Map_Drug$no_cases, wm234_lw)
-gi.fixed
-```
-
-```{r}
-Thailand.gi <- cbind(Thailand_Map_Drug, as.matrix(gi.fixed)) %>%
-  rename(gstat_fixed = as.matrix.gi.fixed.)
-```
-
-```{r}
-Thailand_Map_Drug <- Thailand_Map_Drug %>%
-  mutate(cases_group = cut(no_cases, 
-                            breaks = seq(0, max(no_cases, na.rm = TRUE), by = 1000), 
-                            include.lowest = TRUE,
-                            right = FALSE))
-no_cases_map <- qtm(Thailand_Map_Drug, "cases_group")
-
-Gimap <-tm_shape(Thailand.gi) +
-  tm_fill(col = "gstat_fixed", 
-          style = "pretty",
-          palette="-RdBu",
-          title = "local Gi") +
-  tm_borders(alpha = 0.5)
-
-tmap_arrange(no_cases_map, Gimap, asp=1, ncol=2)
-```
