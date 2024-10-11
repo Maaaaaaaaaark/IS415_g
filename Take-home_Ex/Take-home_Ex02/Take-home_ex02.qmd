@@ -41,7 +41,7 @@ st_transform(Thailand_Map, crs = 32647)
 Thailand <- read_csv("data/archive/thai_drug_offenses_2017_2022.csv")
 ```
 
-### data marning
+### data
 
 left join the data
 
@@ -121,10 +121,6 @@ wm_q2017 <- Drug2017_buffered %>%
 ```
 
 ```{r}
-summary(wm_q2017)
-```
-
-```{r}
 Drug2018_buffered <- st_buffer(Drug2018, dist = 1000) 
 wm_q2018 <- Drug2018_buffered %>%
   mutate(nb = st_contiguity(geometry),
@@ -187,8 +183,9 @@ global_moran_test(wm_q2017$Total,
                        wm_q2017$nb,
                        wm_q2017$wt)
 ```
-The positive Moran's I value indicates a moderate degree of clustering of drug cases.
-The p-value (0.01643)meaning there is a significant positive autocorrelation of drug cases in 2017.
+
+The positive Moran's I value indicates a moderate degree of clustering of drug cases. The p-value (0.01643)meaning there is a significant positive autocorrelation of drug cases in 2017.
+
 ```{r}
 moranI2018 <- global_moran(wm_q2018$Total,
                        wm_q2018$nb,
@@ -218,8 +215,8 @@ global_moran_test(wm_q2019$Total,
                        wm_q2019$nb,
                        wm_q2019$wt)
 ```
-The clustering continues, though slightly weaker than in 2017.
-The p-value (0.03297) indicates that the result is still statistically significant, implying that similar values are still more likely to be found near each other.
+
+The clustering continues, though slightly weaker than in 2017. The p-value (0.03297) indicates that the result is still statistically significant, implying that similar values are still more likely to be found near each other.
 
 2020
 
@@ -235,8 +232,8 @@ global_moran_test(wm_q2020$Total,
                        wm_q2020$nb,
                        wm_q2020$wt)
 ```
-The clustering strength decreased slightly compared to 2019 but remains significant.
-The p-value shows that the clustering is statistically significant.
+
+The clustering strength decreased slightly compared to 2019 but remains significant. The p-value shows that the clustering is statistically significant.
 
 2021
 
@@ -252,8 +249,8 @@ global_moran_test(wm_q2021$Total,
                        wm_q2021$nb,
                        wm_q2021$wt)
 ```
-This year shows a notable increase in clustering compared to previous years, indicating a higher concentration of drug cases in certain areas.
-The p-value indicates a very strong statistical significance.
+
+This year shows a notable increase in clustering compared to previous years, indicating a higher concentration of drug cases in certain areas. The p-value indicates a very strong statistical significance.
 
 2022
 
@@ -269,15 +266,15 @@ global_moran_test(wm_q2022$Total,
                        wm_q2022$nb,
                        wm_q2022$wt)
 ```
-The highest Moran's I value recorded, indicating even stronger clustering of drug cases compared to all previous years.
-The extremely low p-value confirms that this result is highly statistically significant.
 
-Over the years from 2017 to 2022, the strength of spatial autocorrelation in drug cases has generally increased, indicating a trend toward greater clustering.
-The significant p-values across the years suggest that similar drug case counts are consistently found in geographically close areas.
-The increasing Moran's I values could suggest that the distribution of drug cases is becoming more concentrated in specific regions over time.
+The highest Moran's I value recorded, indicating even stronger clustering of drug cases compared to all previous years. The extremely low p-value confirms that this result is highly statistically significant.
+
+Over the years from 2017 to 2022, the strength of spatial autocorrelation in drug cases has generally increased, indicating a trend toward greater clustering. The significant p-values across the years suggest that similar drug case counts are consistently found in geographically close areas. The increasing Moran's I values could suggest that the distribution of drug cases is becoming more concentrated in specific regions over time.
 
 ### Performing Global Moran’I permutation test
+
 2017
+
 ```{r}
 set.seed(1234)
 global_moran_perm(wm_q2017$Total,
@@ -285,7 +282,9 @@ global_moran_perm(wm_q2017$Total,
                        wm_q2017$wt,
                   nsim = 99)
 ```
+
 2018
+
 ```{r}
 set.seed(1234)
 global_moran_perm(wm_q2018$Total,
@@ -293,7 +292,9 @@ global_moran_perm(wm_q2018$Total,
                        wm_q2018$wt,
                   nsim = 99)
 ```
+
 2019
+
 ```{r}
 set.seed(1234)
 global_moran_perm(wm_q2019$Total,
@@ -303,6 +304,7 @@ global_moran_perm(wm_q2019$Total,
 ```
 
 2020
+
 ```{r}
 set.seed(1234)
 global_moran_perm(wm_q2020$Total,
@@ -310,7 +312,9 @@ global_moran_perm(wm_q2020$Total,
                        wm_q2020$wt,
                   nsim = 99)
 ```
+
 2021
+
 ```{r}
 set.seed(1234)
 global_moran_perm(wm_q2021$Total,
@@ -320,6 +324,7 @@ global_moran_perm(wm_q2021$Total,
 ```
 
 2022
+
 ```{r}
 set.seed(1234)
 global_moran_perm(wm_q2022$Total,
@@ -327,15 +332,17 @@ global_moran_perm(wm_q2022$Total,
                        wm_q2022$wt,
                   nsim = 99)
 ```
+
 Change in Moran's I Statistic:
 
-From 2017 to 2022, the Moran's I statistic shows an overall increasing trend, rising from 0.12305 to 0.24112. This suggests a growing spatial clustering of drug cases over this period.
-Change in p-values:
+From 2017 to 2022, the Moran's I statistic shows an overall increasing trend, rising from 0.12305 to 0.24112. This suggests a growing spatial clustering of drug cases over this period. Change in p-values:
 
-From 2017 to 2020, the p-values are relatively high (greater than 0.05), indicating insufficient evidence to suggest significant spatial autocorrelation of drug cases. However, in 2021 and 2022, the p-values notably decrease, especially in 2022, where the p-value is less than 0.05, indicating significant spatial autocorrelation in drug cases during these years.
-Observed Ranks:
+From 2017 to 2020, the p-values are relatively high (greater than 0.05), indicating insufficient evidence to suggest significant spatial autocorrelation of drug cases. However, in 2021 and 2022, the p-values notably decrease, especially in 2022, where the p-value is less than 0.05, indicating significant spatial autocorrelation in drug cases during these years. Observed Ranks:
 
 The observed ranks are consistently around 90 to 100 each year, with 2022 reaching a rank of 100, indicating that the Moran's I statistic for that year performed best among all simulations, showcasing the strongest spatial clustering.
+
+orr2017)
+
 
 
 ## Lisa Map
@@ -393,6 +400,7 @@ lisa2022 <- wm_q2022 %>%
 ### Visualising local Moran’s I and p-value
 
 2017
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa2017) +
@@ -412,7 +420,9 @@ map2 <- tm_shape(lisa2017) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 2018
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa2018) +
@@ -432,7 +442,9 @@ map2 <- tm_shape(lisa2018) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 2019
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa2019) +
@@ -452,7 +464,9 @@ map2 <- tm_shape(lisa2019) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 2020
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa2020) +
@@ -472,7 +486,9 @@ map2 <- tm_shape(lisa2020) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 2021
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa2021) +
@@ -492,7 +508,9 @@ map2 <- tm_shape(lisa2021) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 2022
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa2022) +
@@ -512,7 +530,9 @@ map2 <- tm_shape(lisa2022) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 ### Plotting LISA map
+
 ```{r}
 lisa_sig2017 <- lisa2017  %>%
   filter(p_ii_sim < 0.05)
@@ -576,13 +596,215 @@ tm_shape(lisa_sig2022) +
   tm_borders(alpha = 0.4)
 ```
 
-## Analysis
-Drug trends from 2017 to 2022
-Spatial autocorrelation: from 2017 to 2020, statistic shows a yearly increasing trend, which suggests a stronger spatial clustering of the distribution of drug cases over this period. High Moran's I values imply that drug cases may be more concentrated in certain areas.(e.g. areas close to the Golden Triangle)
-Changes in 2021 and 2022
-Declining Moran's I values: in 2021 and 2022, while Moran's I values still exhibit spatial autocorrelation, they decline compared to previous years.This is analyzed below:
-1 Impact of drug legalization
-Legalization of Medical Marijuana: In 2021, Thailand became the first country in Southeast Asia to legalize medical marijuana. The implementation of this policy may have changed public attitudes towards drugs and reduced the demand for other illegal drugs. Legalization may entice some consumers to turn to legalized marijuana products, reducing demand for traditional drugs (e.g., heroin, methamphetamine, etc.).
-2. Impact of the epidemic
-COVID-19 Epidemic: Social closures and travel restrictions during an epidemic may lead to a decrease in the drug trade, particularly a slowdown in international drug smuggling. Closed social environments and economic pressures may have prompted some populations to reduce their use of drugs.
+## Hot Spot and Cold Spot Area Analysis
+2017
+```{r}
+wm_idw2017 <- Drug2017 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+2018
+```{r}
+wm_idw2018 <- Drug2018 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
 
+2019
+```{r}
+wm_idw2019 <- Drug2019 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+2020
+```{r}
+wm_idw2020 <- Drug2020 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+2021
+```{r}
+wm_idw2021 <- Drug2021 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+2022
+```{r}
+wm_idw2022 <- Drug2022 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+### Computing local Gi* statistics
+
+```{r}
+HCSA2017 <- wm_idw2017 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2017
+```
+2018
+```{r}
+HCSA2018 <- wm_idw2018 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2018
+```
+
+2019
+```{r}
+HCSA2019 <- wm_idw2019 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2019
+```
+
+2020
+```{r}
+HCSA2020 <- wm_idw2020 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2020
+```
+
+2021
+```{r}
+HCSA2021 <- wm_idw2021 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2021
+```
+
+2022
+```{r}
+HCSA2022 <- wm_idw2022 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2022
+```
+### Visualising hot spot and cold spot areas
+2017
+```{r}
+HCSA_sig2017 <- HCSA2017  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2017) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2017) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+2018
+```{r}
+HCSA_sig2018 <- HCSA2018  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2017) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2018) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+2019
+```{r}
+HCSA_sig2019 <- HCSA2019  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2019) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2019) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+2020
+```{r}
+HCSA_sig2020 <- HCSA2020  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2020) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2020) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+2021
+```{r}
+HCSA_sig2021 <- HCSA2021  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2021) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2021) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+2022
+```{r}
+HCSA_sig2022 <- HCSA2022  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2022) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2022) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+## Analysis
+
+Drug trends from 2017 to 2022 Spatial autocorrelation: from 2017 to 2020, statistic shows a yearly increasing trend, which suggests a stronger spatial clustering of the distribution of drug cases over this period. High Moran's I values imply that drug cases may be more concentrated in certain areas.(e.g. areas close to the Golden Triangle) Changes in 2021 and 2022 Declining Moran's I values: in 2021 and 2022, while Moran's I values still exhibit spatial autocorrelation, they decline compared to previous years.This is analyzed below: 1 Impact of drug legalization Legalization of Medical Marijuana: In 2021, Thailand became the first country in Southeast Asia to legalize medical marijuana. The implementation of this policy may have changed public attitudes towards drugs and reduced the demand for other illegal drugs. Legalization may entice some consumers to turn to legalized marijuana products, reducing demand for traditional drugs (e.g., heroin, methamphetamine, etc.). 2. Impact of the epidemic COVID-19 Epidemic: Social closures and travel restrictions during an epidemic may lead to a decrease in the drug trade, particularly a slowdown in international drug smuggling. Closed social environments and economic pressures may have prompted some populations to reduce their use of drugs.
