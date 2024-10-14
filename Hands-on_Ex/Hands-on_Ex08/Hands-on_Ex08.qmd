@@ -4,14 +4,14 @@ author: "Yuheng Liang"
 format: html
 editor: visual
 date: "Oct 4, 2024"
-date-modified: "Oct 4, 2024"
+date-modified: "Oct 14, 2024"
 execute: 
   eval: true
   echo: true
   freeze: true
 ---
 
-# Hands-on exercise08
+# Hands-on exercise 08-09
 
 ## 1.0 The data
 
@@ -410,27 +410,36 @@ print(gap_stat,methods ="firstmax")
 ```
 
 visualise the plot by using fviz_gap_stat() of factoextra package.
+
 ```{r}
 fviz_gap_stat(gap_stat)
 ```
+
 ### 4.10 Interpreting the dendrograms
-In the dendrogram displayed above, each leaf corresponds to one observation. As we move up the tree, observations that are similar to each other are combined into branches, which are themselves fused at a higher height.
-The height of the fusion, provided on the vertical axis, indicates the (dis)similarity between two observations. The higher the height of the fusion, the less similar the observations are. Note that, conclusions about the proximity of two observations can be drawn only based on the height where branches containing those two observations first are fused. We cannot use the proximity of two observations along the horizontal axis as a criteria of their similarity.
-draw the dendrogram with a border around the selected clusters by using rect.hclust() of R stats
+
+In the dendrogram displayed above, each leaf corresponds to one observation. As we move up the tree, observations that are similar to each other are combined into branches, which are themselves fused at a higher height. The height of the fusion, provided on the vertical axis, indicates the (dis)similarity between two observations. The higher the height of the fusion, the less similar the observations are. Note that, conclusions about the proximity of two observations can be drawn only based on the height where branches containing those two observations first are fused. We cannot use the proximity of two observations along the horizontal axis as a criteria of their similarity. draw the dendrogram with a border around the selected clusters by using rect.hclust() of R stats
+
 ```{r}
 plot(hclust_ward, cex = 0.6)
 rect.hclust(hclust_ward,
             k=6,
             border = 2:5)
 ```
+
 ### 4.11 Visually-driven hierarchical clustering analysis
+
 #### 4.11.1 Transforming the data frame into a matrix
+
 transform shan_ict data frame into a data matrix.
+
 ```{r}
 shan_ict_mat <- data.matrix(shan_ict)
 ```
+
 #### 4.11.2 Plotting interactive cluster heatmap using heatmaply()
+
 the heatmaply() of heatmaply package is used to build an interactive cluster heatmap
+
 ```{r}
 heatmaply(normalize(shan_ict_mat),
           Colv=NA,
@@ -447,21 +456,96 @@ heatmaply(normalize(shan_ict_mat),
           ylab = "Townships of Shan State"
           )
 ```
+
 ### 4.12 Mapping the clusters formed
+
 ```{r}
 groups <- as.factor(cutree(hclust_ward, k=6))
 ```
-Output is called groups. It is a list object
-the groups object need to be appended onto shan_sf simple feature object.
-The code chunk below form the join in three steps:
-the groups list object will be converted into a matrix;
-cbind() is used to append groups matrix onto shan_sf to produce an output simple feature object called shan_sf_cluster; and
-rename of dplyr package is used to rename as.matrix.groups field as CLUSTER.
+
+Output is called groups. It is a list object the groups object need to be appended onto shan_sf simple feature object. The code chunk below form the join in three steps: the groups list object will be converted into a matrix; cbind() is used to append groups matrix onto shan_sf to produce an output simple feature object called shan_sf_cluster; and rename of dplyr package is used to rename as.matrix.groups field as CLUSTER.
+
 ```{r}
 shan_sf_cluster <- cbind(shan_sf, as.matrix(groups)) %>%
   rename(`CLUSTER`=`as.matrix.groups.`)
 ```
+
 plot the choropleth map
+
 ```{r}
 qtm(shan_sf_cluster, "CLUSTER")
 ```
+## 5.0 Spatially Constrained Clustering : SKATER approach
+### 5.1 Converting into SpatialPolygonsDataFrame
+SKATER function only support sp projects such as SpatialPolygonDataFrame
+```{r}
+shan_sp <- as_Spatial(shan_sf)
+```
+### 5.2 Computing Neighbour List
+```{r}
+shan.nb <- poly2nb(shan_sp)
+summary(shan.nb)
+```
+plot the neighbours list on Shan_sp by using the code chunk below. The first plot command gives the boundaries. This is follow by the plot of the neighbor list object, with coordinates applied to the original SpatialPolygonDateFrame to extract the centroids of the polygons. 
+```{r}
+coords <- st_coordinates(
+  st_centroid(st_geometry(shan_sf))
+)
+```
+plot
+```{r}
+plot(st_geometry(shan_sf),
+     border = grey(.5))
+plot(shan.nb,
+     coords,
+     col = "blue",
+     add=TRUE)
+```
+
+Note that if you plot the network first and then the boundaries, some of the areas will be clipped. This is because the plotting area is determined by the characteristics of the first plot.
+
+### 5.3 Computing minimun spanning tree
+#### 5.3.1 Calculating edge costs
+nbcosts() of spdep package is used to compute the cost of each edge.
+It is the distance between the nodes. This function compute this distance using a data.frame with observations vector in each node.
+```{r}
+lcosts <- nbcosts(shan.nb, shan_ict)
+```
+For each observation, this gives the pairwise dissimilarity between its valuse on the five variables and the values for the neighbouring observation. 
+Basically, this is the notion if a generalised weight for a spatial weights matrix.
+
+We will incorporate these costs into a weights object in the same way as we did in the calculation of inverse of distance weights. In other words, we convert the neighbour list to a list weights object by specifying the just computed lcosts as the weights.
+```{r}
+shan.w <- nb2listw(shan.nb,
+                   lcosts,
+                   style = "B")
+summary(shan.w)
+```
+### 5.4 Computing minimun spanning tree
+```{r}
+shan.mst <- mstree(shan.w)
+```
+check its class and dimension by using the code chunk below
+```{r}
+class(shan.mst)
+```
+```{r}
+dim(shan.mst)
+```
+the dimension is 54 and not 55. This is because the minimum spanning tree cosistson n-1 edges(links) in order to traverse all the nodes
+display the content of shan.mst
+```{r}
+head(shan.mst)
+```
+The plot method fot the MST include a way to show the observation numbers of the nodes in addition to the edge.
+```{r}
+plot(st_geometry(shan_sf),
+     border = gray(.5))
+plot.mst(shan.mst,
+         coords,
+         col="blue",
+         cex.lab=0.7,
+         cex.circles = 0.005,
+         add = TRUE)
+```
+

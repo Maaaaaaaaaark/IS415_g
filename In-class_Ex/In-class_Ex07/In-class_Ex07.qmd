@@ -1,0 +1,12 @@
+---
+title: "In-class_Ex07"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "Oct 14, 2024"
+date-modified: "Oct 14,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
