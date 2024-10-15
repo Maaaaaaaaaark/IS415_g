@@ -4,7 +4,7 @@ author: "Yuheng Liang"
 format: html
 editor: visual
 date: "Oct 4, 2024"
-date-modified: "Oct 14, 2024"
+date-modified: "Oct 15, 2024"
 execute: 
   eval: true
   echo: true
@@ -475,24 +475,34 @@ plot the choropleth map
 ```{r}
 qtm(shan_sf_cluster, "CLUSTER")
 ```
+
 ## 5.0 Spatially Constrained Clustering : SKATER approach
+
 ### 5.1 Converting into SpatialPolygonsDataFrame
+
 SKATER function only support sp projects such as SpatialPolygonDataFrame
+
 ```{r}
 shan_sp <- as_Spatial(shan_sf)
 ```
+
 ### 5.2 Computing Neighbour List
+
 ```{r}
 shan.nb <- poly2nb(shan_sp)
 summary(shan.nb)
 ```
-plot the neighbours list on Shan_sp by using the code chunk below. The first plot command gives the boundaries. This is follow by the plot of the neighbor list object, with coordinates applied to the original SpatialPolygonDateFrame to extract the centroids of the polygons. 
+
+plot the neighbours list on Shan_sp by using the code chunk below. The first plot command gives the boundaries. This is follow by the plot of the neighbor list object, with coordinates applied to the original SpatialPolygonDateFrame to extract the centroids of the polygons.
+
 ```{r}
 coords <- st_coordinates(
   st_centroid(st_geometry(shan_sf))
 )
 ```
+
 plot
+
 ```{r}
 plot(st_geometry(shan_sf),
      border = grey(.5))
@@ -505,39 +515,50 @@ plot(shan.nb,
 Note that if you plot the network first and then the boundaries, some of the areas will be clipped. This is because the plotting area is determined by the characteristics of the first plot.
 
 ### 5.3 Computing minimun spanning tree
+
 #### 5.3.1 Calculating edge costs
-nbcosts() of spdep package is used to compute the cost of each edge.
-It is the distance between the nodes. This function compute this distance using a data.frame with observations vector in each node.
+
+nbcosts() of spdep package is used to compute the cost of each edge. It is the distance between the nodes. This function compute this distance using a data.frame with observations vector in each node.
+
 ```{r}
 lcosts <- nbcosts(shan.nb, shan_ict)
 ```
-For each observation, this gives the pairwise dissimilarity between its valuse on the five variables and the values for the neighbouring observation. 
-Basically, this is the notion if a generalised weight for a spatial weights matrix.
+
+For each observation, this gives the pairwise dissimilarity between its valuse on the five variables and the values for the neighbouring observation. Basically, this is the notion if a generalised weight for a spatial weights matrix.
 
 We will incorporate these costs into a weights object in the same way as we did in the calculation of inverse of distance weights. In other words, we convert the neighbour list to a list weights object by specifying the just computed lcosts as the weights.
+
 ```{r}
 shan.w <- nb2listw(shan.nb,
                    lcosts,
                    style = "B")
 summary(shan.w)
 ```
+
 ### 5.4 Computing minimun spanning tree
+
 ```{r}
 shan.mst <- mstree(shan.w)
 ```
+
 check its class and dimension by using the code chunk below
+
 ```{r}
 class(shan.mst)
 ```
+
 ```{r}
 dim(shan.mst)
 ```
-the dimension is 54 and not 55. This is because the minimum spanning tree cosistson n-1 edges(links) in order to traverse all the nodes
-display the content of shan.mst
+
+the dimension is 54 and not 55. This is because the minimum spanning tree cosistson n-1 edges(links) in order to traverse all the nodes display the content of shan.mst
+
 ```{r}
 head(shan.mst)
 ```
+
 The plot method fot the MST include a way to show the observation numbers of the nodes in addition to the edge.
+
 ```{r}
 plot(st_geometry(shan_sf),
      border = gray(.5))
@@ -547,5 +568,124 @@ plot.mst(shan.mst,
          cex.lab=0.7,
          cex.circles = 0.005,
          add = TRUE)
+```
+
+### 5.5 Computing spatially constrained clusters using SKATER method
+
+Compute the spatially constrained cluster 
+```{r}
+clust6 <- spdep::skater(edges = shan.mst[,1:2], 
+                 data = shan_ict, 
+                 method = "euclidean", 
+                 ncuts = 5)
+```
+The skater() takes three mandatory arguments:
+The first two columns of the MST matrix
+The data matrix(to update the costs as units are being grouped)
+The number of cuts
+
+examine its contents
+```{r}
+str(clust6)
+```
+
+check the cluster assignment
+```{r}
+ccs6 <- clust6$groups
+ccs6
+```
+
+we can find out how many observations are in each cluster by means of the table command.we can also find this as the dimension of each vector in the list contained in edge
+```{r}
+table(ccs6)
+```
+plot the pruned tree that shows the five cluster on top of the townshop area
+```{R}
+plot(st_geometry(shan_sf), 
+     border=gray(.5))
+plot(clust6, 
+     coords, 
+     cex.lab=.7,
+     groups.colors=c("red","green","blue", "brown", "pink"),
+     cex.circles=0.005, 
+     add=TRUE)
+``` 
+### 5.6 Visualising the clusters in choropleth map
+plot the newly derived cluster
+```{r}
+groups_mat <- as.matrix(clust6$groups)
+shan_sf_spatialcluster <- cbind(shan_sf_cluster,as.factor(groups_mat))%>%
+  rename(`SP_CLUSTER`=`as.factor.groups_mat.`)
+qtm(shan_sf_spatialcluster,"SP_CLUSTER")
+```
+place both the hierarchical clustering and spatially constrained hierarchical clustering maps next to each other
+```{r}
+hclust.map <- qtm(shan_sf_cluster,
+                  "CLUSTER") + 
+  tm_borders(alpha = 0.5) 
+
+shclust.map <- qtm(shan_sf_spatialcluster,
+                   "SP_CLUSTER") + 
+  tm_borders(alpha = 0.5) 
+
+tmap_arrange(hclust.map, shclust.map,
+             asp=NA, ncol=2)
+```
+## 6.0 Spatially Constrained Clustering: ClustGeo Methodx
+### 6.1 About ClustGeo package
+ClusterGeo is an R package specially designed to support the need of performing spatially constrained cluster analysis.
+And it also provides a Ward-like hierarchical clustering algorithm called hclustgeo() including spatial/geographical constrains
+The idea is then to determine a value of alpha which increase the spatial contiguity without deteriorting too much the quality of the solution based on the variables of interest. This need is supported by a function called choicealpha()
+### 6.2 Ward-like hierarchical clustering: ClustGeo
+ClustGeo package provides function called hclusegeo() to perform a typical Ward-likeb hierarchical clustering just like hclust().
+To perform non-spatially constrained hierarchical clustering, we only need to provide the function a dissimilarity matrix
+```{r}
+nongeo_cluster <- hclustgeo(proxmat)
+plot(nongeo_cluster,cex= 0.5)
+rect.hclust(nongeo_cluster,
+            k = 6,
+            border = 2:5)
+```
+the dissimilarity matrix must be an object of class dist.
+#### 6.2.1 Mapping the clister formed
+```{r}
+groups <- as.factor(cutree(nongeo_cluster,k=6))
+```
+
+```{r}
+shan_sf_ngeo_cluster <- cbind(shan_sf, as.matrix(groups)) %>%
+  rename(`CLUSTER` = `as.matrix.groups.`)
+```
+
+```{r}
+qtm(shan_sf_ngeo_cluster,"CLUSTER")
+```
+### 6.3 Spatially Constrained Hierarchical Clustering
+Before we can performed spatially constrained hierarchiacl clustering, a spatial distance matrix will be derived by using st_distance() of sf package.
+```{r}
+dist<- st_distance(shan_sf,shan_sf)
+distmat <- as.dist(dist)
+```
+as.dist is used to convert the data frame into matrix
+choicealpha() will be used to determine a suitable value for the mixing parameter alpha as shown in the code chunk below.
+```{r}
+cr <- choicealpha(proxmat, distmat, range.alpha = seq(0, 1, 0.1), K=6, graph = TRUE)
+```
+alpha = 0.2 
+```{r}
+clustG <- hclustgeo(proxmat,distmat, alpha = 0.2)
+```
+cutree() is used to deive the cluster object
+```{R}
+groups <- as.factor(cutree(clustG,k=6))
+```
+join back the group list with shan_sf polygon feature data frame 
+```{r}
+shan_sf_Gcluster <- cbind(shan_sf,as.matrix(groups))%>%
+  rename(`CLUSTER`=`as.matrix.groups.`)
+```
+plot the map
+```{r}
+qtm(shan_sf_Gcluster,"CLUSTER")
 ```
 
