@@ -740,13 +740,14 @@ The parallel coordinate plot above reveals that households in Cluster 4 township
 
 -   uniminmax: univariately, scale so the minimum of the variable is zero, and the maximum is one.
 
--    globalminmax: no scaling is done; the range of the graphs is defined by the global minimum and the global maximum.
+-   globalminmax: no scaling is done; the range of the graphs is defined by the global minimum and the global maximum.
 
 -   center: use uniminmax to standardize vertical height, then center each variable at a value specified by the scaleSummary param.
 
--    centerObs: use uniminmax to standardize vertical height, then center each variable at the value of the observation specified by the centerObsID param
+-   centerObs: use uniminmax to standardize vertical height, then center each variable at the value of the observation specified by the centerObsID param
 
 group_by() and summarise() of dplyr are used to derive mean values of the clustering variables.
+
 ```{r}
 shan_sf_ngeo_cluster %>% 
   st_set_geometry(NULL) %>%

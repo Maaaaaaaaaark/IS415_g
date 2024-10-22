@@ -343,8 +343,6 @@ The observed ranks are consistently around 90 to 100 each year, with 2022 reachi
 
 orr2017)
 
-
-
 ## Lisa Map
 
 ### Compute Moran’s I correlogram
@@ -597,7 +595,9 @@ tm_shape(lisa_sig2022) +
 ```
 
 ## Hot Spot and Cold Spot Area Analysis
+
 2017
+
 ```{r}
 wm_idw2017 <- Drug2017 %>%
   mutate(nb = include_self(
@@ -608,7 +608,9 @@ wm_idw2017 <- Drug2017 %>%
                               alpha = 1),
          .before = 1)
 ```
+
 2018
+
 ```{r}
 wm_idw2018 <- Drug2018 %>%
   mutate(nb = include_self(
@@ -621,6 +623,7 @@ wm_idw2018 <- Drug2018 %>%
 ```
 
 2019
+
 ```{r}
 wm_idw2019 <- Drug2019 %>%
   mutate(nb = include_self(
@@ -633,6 +636,7 @@ wm_idw2019 <- Drug2019 %>%
 ```
 
 2020
+
 ```{r}
 wm_idw2020 <- Drug2020 %>%
   mutate(nb = include_self(
@@ -645,6 +649,7 @@ wm_idw2020 <- Drug2020 %>%
 ```
 
 2021
+
 ```{r}
 wm_idw2021 <- Drug2021 %>%
   mutate(nb = include_self(
@@ -657,6 +662,7 @@ wm_idw2021 <- Drug2021 %>%
 ```
 
 2022
+
 ```{r}
 wm_idw2022 <- Drug2022 %>%
   mutate(nb = include_self(
@@ -668,7 +674,7 @@ wm_idw2022 <- Drug2022 %>%
          .before = 1)
 ```
 
-### Computing local Gi* statistics
+### Computing local Gi\* statistics
 
 ```{r}
 HCSA2017 <- wm_idw2017 %>% 
@@ -678,7 +684,9 @@ HCSA2017 <- wm_idw2017 %>%
   unnest(local_Gi)
 HCSA2017
 ```
+
 2018
+
 ```{r}
 HCSA2018 <- wm_idw2018 %>% 
   mutate(local_Gi = local_gstar_perm(
@@ -689,6 +697,7 @@ HCSA2018
 ```
 
 2019
+
 ```{r}
 HCSA2019 <- wm_idw2019 %>% 
   mutate(local_Gi = local_gstar_perm(
@@ -699,6 +708,7 @@ HCSA2019
 ```
 
 2020
+
 ```{r}
 HCSA2020 <- wm_idw2020 %>% 
   mutate(local_Gi = local_gstar_perm(
@@ -709,6 +719,7 @@ HCSA2020
 ```
 
 2021
+
 ```{r}
 HCSA2021 <- wm_idw2021 %>% 
   mutate(local_Gi = local_gstar_perm(
@@ -719,6 +730,7 @@ HCSA2021
 ```
 
 2022
+
 ```{r}
 HCSA2022 <- wm_idw2022 %>% 
   mutate(local_Gi = local_gstar_perm(
@@ -727,8 +739,11 @@ HCSA2022 <- wm_idw2022 %>%
   unnest(local_Gi)
 HCSA2022
 ```
+
 ### Visualising hot spot and cold spot areas
+
 2017
+
 ```{r}
 HCSA_sig2017 <- HCSA2017  %>%
   filter(p_sim < 0.05)
@@ -740,7 +755,9 @@ tm_shape(HCSA_sig2017) +
   tm_fill("cluster") + 
   tm_borders(alpha = 0.4)
 ```
+
 2018
+
 ```{r}
 HCSA_sig2018 <- HCSA2018  %>%
   filter(p_sim < 0.05)
@@ -754,6 +771,7 @@ tm_shape(HCSA_sig2018) +
 ```
 
 2019
+
 ```{r}
 HCSA_sig2019 <- HCSA2019  %>%
   filter(p_sim < 0.05)
@@ -767,6 +785,7 @@ tm_shape(HCSA_sig2019) +
 ```
 
 2020
+
 ```{r}
 HCSA_sig2020 <- HCSA2020  %>%
   filter(p_sim < 0.05)
@@ -780,6 +799,7 @@ tm_shape(HCSA_sig2020) +
 ```
 
 2021
+
 ```{r}
 HCSA_sig2021 <- HCSA2021  %>%
   filter(p_sim < 0.05)
@@ -793,6 +813,7 @@ tm_shape(HCSA_sig2021) +
 ```
 
 2022
+
 ```{r}
 HCSA_sig2022 <- HCSA2022  %>%
   filter(p_sim < 0.05)
