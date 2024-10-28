@@ -1,0 +1,143 @@
+---
+title: "In-class_Ex10"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "Oct 28, 2024"
+date-modified: "Oct 28, 2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# In-class_exe 10
+
+## Getting started
+
+```{r}
+pacman::p_load(olsrr,ggstatsplot,sf,tmap,tidyverse,gtsummary,performance,see,sfdep)
+```
+
+## importing the data
+
+```{r}
+condo_resale <- read_csv("data/aspatial/Condo_resale_2015.csv")
+```
+
+```{r}
+mpsz <- read_rds("data/mpsz.rds")
+```
+
+```{r}
+condo_resale_sf <- read_rds("data/condo_resale_sf.rds")
+```
+
+
+
+Building a Hedonic Pricing Model by using Multiple Linear Regression Method
+
+```{r}
+condo_mlr <- lm(formula = SELLING_PRICE ~ AREA_SQM + AGE    + 
+                  PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+                  PROX_URA_GROWTH_AREA + PROX_HAWKER_MARKET + PROX_KINDERGARTEN + 
+                  PROX_MRT  + PROX_PARK + PROX_PRIMARY_SCH + 
+                  PROX_TOP_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_SUPERMARKET + 
+                  PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                data=condo_resale_sf)
+```
+
+
+Generating tidy linear regression report
+```{r}
+ols_regress(condo_mlr)
+```
+
+```{r}
+olsrr_condo <- ols_regress(condo_mlr)
+```
+
+Variable selection
+```{r}
+condo_fw_mlr <- ols_step_forward_p(condo_mlr,
+                                   p_val = 0.05,
+                                   datails = FALSE)
+condo_fw_mlr
+```
+plot
+```{r}
+plot(condo_fw_mlr)
+```
+
+```{r}
+condo_bw_mlr <- ols_step_backward_p(condo_mlr,
+                                   p_val = 0.05,
+                                   datails = FALSE)
+condo_bw_mlr
+```
+
+```{r}
+condo_bp_mlr <- ols_step_both_p(condo_mlr,
+                                   p_val = 0.05,
+                                   datails = FALSE)
+condo_bp_mlr
+```
+model selection
+```{r}
+metric <- compare_performance(condo_mlr,
+                              condo_fw_mlr$model,
+                              condo_bw_mlr$model,
+                              condo_bp_mlr$model
+                )
+```
+
+gsub() is used to tidy the test value in name field
+```{r}
+metric$Name <- gsub(".*\\\\([a-zA-Z0-9_]+)\\\\,\\\\model\\\\.*","\\1",metric$Name)
+```
+
+comparing the performance
+```{r}
+plot(metric)
+```
+
+Visualising
+```{r}
+ggcoefstats(condo_bp_mlr$model,
+            sort = "ascending")
+```
+checking formulticollinarity
+```{r}
+check_collinearity(condo_bp_mlr$model)
+```
+```{r}
+plot(check_collinearity(condo_bp_mlr$model))+
+  theme(axis.text = element_text(angle = 45,hjust = 1))
+```
+Linear the assumption test
+```{R}
+out <- plot(check_model(condo_bp_mlr$model,
+                        panel = FALSE))
+out[[2]]
+```
+
+Normality assumption test
+```{r}
+plot(check_normality(condo_bp_mlr$model))
+```
+checking the outline
+```{r}
+outliers <- check_outliers(condo_bp_mlr$model,
+                           method = "cook")
+outliers
+```
+```{r}
+plot(check_outliers(condo_bp_mlr$model,
+                           method = "cook"))
+```
+
+```{r}
+mlr_output <- as.data.frame(condo_fw_mlr$model$residuals)%>%
+  rename(`FW_MLR_RES`=`condo_fw_mlr$model$residuals`)
+```
+
