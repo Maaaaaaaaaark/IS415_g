@@ -1,0 +1,923 @@
+---
+title: "Take-home_Ex02"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "September 24, 2024"
+date-modified: "Oct 10,2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+
+# Take home exe2
+
+## Setting the Analytical Tools
+
+
+```{r}
+pacman::p_load(sf,spdep,tmap,tidyverse,dplyr,sfdep)
+```
+
+
+## Getting the data into R Environment
+
+### Import shapefile into r environment
+
+
+```{r}
+Thailand_Map <- st_read(dsn = "data/tha_adm_rtsd_itos_20210121_shp", layer = "tha_admbnda_adm1_rtsd_20220121" )
+```
+
+```{r}
+st_crs(Thailand_Map)
+```
+
+```{r}
+st_transform(Thailand_Map, crs = 32647)
+```
+
+
+### Import. csv file into r environment
+
+
+```{r}
+Thailand <- read_csv("data/archive/thai_drug_offenses_2017_2022.csv")
+```
+
+
+### data
+
+left join the data
+
+
+```{r}
+Thailand = Thailand %>%
+  pivot_wider(names_from = types_of_drug_offenses, values_from = no_cases) %>%
+  mutate(`Total` = rowSums(.[4:19]))
+```
+
+```{r}
+Thailand_Map_Drug <- left_join(Thailand_Map, Thailand, by = c("ADM1_EN" = "province_en"))%>%
+  dplyr::select(1:3, 17,19:36)
+```
+
+
+flit the drug abuse data by year
+
+
+```{r}
+Drug2017 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2017")
+Drug2018 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2018")
+Drug2019 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2019")
+Drug2020 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2020")
+Drug2021 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2021")
+Drug2022 = Thailand_Map_Drug %>% 
+  filter(fiscal_year == "2022")
+```
+
+
+Visualising the data
+
+
+```{r}
+quantile2017 = tm_shape(Drug2017) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2018 = tm_shape(Drug2018) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2019 = tm_shape(Drug2019) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2020 = tm_shape(Drug2020) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2021 = tm_shape(Drug2021) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+quantile2022 = tm_shape(Drug2022) +
+  tm_fill(style = "quantile") +
+  tm_borders(alpha = 1)
+tmap_arrange(quantile2017,quantile2018,quantile2019,quantile2020,quantile2021,quantile2022,ncol = 2)
+```
+
+
+## Global Measures of Spatial Autocorrelation
+
+### Computing Contiguity Spatial Weights
+
+
+```{r}
+wm_q2017 = Drug2017 %>%
+  mutate(nb = st_contiguity(geometry),
+         .before = 1)
+```
+
+```{r}
+str(wm_q2017)
+```
+
+```{r}
+Drug2017_buffered <- st_buffer(Drug2017, dist = 1000) 
+wm_q2017 <- Drug2017_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2018_buffered <- st_buffer(Drug2018, dist = 1000) 
+wm_q2018 <- Drug2018_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2019_buffered <- st_buffer(Drug2019, dist = 1000) 
+wm_q2019 <- Drug2019_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2020_buffered <- st_buffer(Drug2020, dist = 1000) 
+wm_q2020 <- Drug2020_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2021_buffered <- st_buffer(Drug2021, dist = 1000) 
+wm_q2021 <- Drug2021_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+```{r}
+Drug2022_buffered <- st_buffer(Drug2022, dist = 1000) 
+wm_q2022 <- Drug2022_buffered %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1) 
+```
+
+
+## Global Measures of Spatial Autocorrelation: Moran’s I
+
+### Maron’s I test
+
+2017
+
+
+```{r}
+moranI2017 <- global_moran(wm_q2017$Total,
+                       wm_q2017$nb,
+                       wm_q2017$wt)
+glimpse(moranI2017)
+```
+
+```{r}
+global_moran_test(wm_q2017$Total,
+                       wm_q2017$nb,
+                       wm_q2017$wt)
+```
+
+
+The positive Moran's I value indicates a moderate degree of clustering of drug cases. The p-value (0.01643)meaning there is a significant positive autocorrelation of drug cases in 2017.
+
+
+```{r}
+moranI2018 <- global_moran(wm_q2018$Total,
+                       wm_q2018$nb,
+                       wm_q2018$wt)
+glimpse(moranI2018)
+```
+
+```{r}
+global_moran_test(wm_q2018$Total,
+                       wm_q2018$nb,
+                       wm_q2018$wt)
+```
+
+
+Moran’s I slightly decreases to 0.105375571, with a p-value of 0.004180372 Though the value is lower than in 2017, there is still significant positive spatial autocorrelation.
+
+2019
+
+
+```{r}
+moranI2019 <- global_moran(wm_q2019$Total,
+                       wm_q2019$nb,
+                       wm_q2019$wt)
+glimpse(moranI2019)
+```
+
+```{r}
+global_moran_test(wm_q2019$Total,
+                       wm_q2019$nb,
+                       wm_q2019$wt)
+```
+
+
+The clustering continues, though slightly weaker than in 2017. The p-value (0.03297) indicates that the result is still statistically significant, implying that similar values are still more likely to be found near each other.
+
+2020
+
+
+```{r}
+moranI2020 <- global_moran(wm_q2020$Total,
+                       wm_q2020$nb,
+                       wm_q2020$wt)
+glimpse(moranI2020)
+```
+
+```{r}
+global_moran_test(wm_q2020$Total,
+                       wm_q2020$nb,
+                       wm_q2020$wt)
+```
+
+
+The clustering strength decreased slightly compared to 2019 but remains significant. The p-value shows that the clustering is statistically significant.
+
+2021
+
+
+```{r}
+moranI2021 <- global_moran(wm_q2021$Total,
+                       wm_q2021$nb,
+                       wm_q2021$wt)
+glimpse(moranI2021)
+```
+
+```{r}
+global_moran_test(wm_q2021$Total,
+                       wm_q2021$nb,
+                       wm_q2021$wt)
+```
+
+
+This year shows a notable increase in clustering compared to previous years, indicating a higher concentration of drug cases in certain areas. The p-value indicates a very strong statistical significance.
+
+2022
+
+
+```{r}
+moranI2022 <- global_moran(wm_q2022$Total,
+                       wm_q2022$nb,
+                       wm_q2022$wt)
+glimpse(moranI2022)
+```
+
+```{r}
+global_moran_test(wm_q2022$Total,
+                       wm_q2022$nb,
+                       wm_q2022$wt)
+```
+
+
+The highest Moran's I value recorded, indicating even stronger clustering of drug cases compared to all previous years. The extremely low p-value confirms that this result is highly statistically significant.
+
+Over the years from 2017 to 2022, the strength of spatial autocorrelation in drug cases has generally increased, indicating a trend toward greater clustering. The significant p-values across the years suggest that similar drug case counts are consistently found in geographically close areas. The increasing Moran's I values could suggest that the distribution of drug cases is becoming more concentrated in specific regions over time.
+
+### Performing Global Moran’I permutation test
+
+2017
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2017$Total,
+                       wm_q2017$nb,
+                       wm_q2017$wt,
+                  nsim = 99)
+```
+
+
+2018
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2018$Total,
+                       wm_q2018$nb,
+                       wm_q2018$wt,
+                  nsim = 99)
+```
+
+
+2019
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2019$Total,
+                       wm_q2019$nb,
+                       wm_q2019$wt,
+                  nsim = 99)
+```
+
+
+2020
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2020$Total,
+                       wm_q2020$nb,
+                       wm_q2020$wt,
+                  nsim = 99)
+```
+
+
+2021
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2021$Total,
+                       wm_q2021$nb,
+                       wm_q2021$wt,
+                  nsim = 99)
+```
+
+
+2022
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q2022$Total,
+                       wm_q2022$nb,
+                       wm_q2022$wt,
+                  nsim = 99)
+```
+
+
+Change in Moran's I Statistic:
+
+From 2017 to 2022, the Moran's I statistic shows an overall increasing trend, rising from 0.12305 to 0.24112. This suggests a growing spatial clustering of drug cases over this period. Change in p-values:
+
+From 2017 to 2020, the p-values are relatively high (greater than 0.05), indicating insufficient evidence to suggest significant spatial autocorrelation of drug cases. However, in 2021 and 2022, the p-values notably decrease, especially in 2022, where the p-value is less than 0.05, indicating significant spatial autocorrelation in drug cases during these years. Observed Ranks:
+
+The observed ranks are consistently around 90 to 100 each year, with 2022 reaching a rank of 100, indicating that the Moran's I statistic for that year performed best among all simulations, showcasing the strongest spatial clustering.
+
+orr2017)
+
+## Lisa Map
+
+### Compute Moran’s I correlogram
+
+
+```{r}
+lisa2017 <- wm_q2017 %>% 
+  mutate(local_moran = local_moran(
+    Drug2017$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+lisa2018 <- wm_q2018 %>% 
+  mutate(local_moran = local_moran(
+    Drug2018$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+lisa2019 <- wm_q2019 %>% 
+  mutate(local_moran = local_moran(
+    Drug2019$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+lisa2020 <- wm_q2020 %>% 
+  mutate(local_moran = local_moran(
+    Drug2020$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+lisa2021 <- wm_q2021 %>% 
+  mutate(local_moran = local_moran(
+    Drug2021$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+lisa2022 <- wm_q2022 %>% 
+  mutate(local_moran = local_moran(
+    Drug2022$Total, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+
+### Visualising local Moran’s I and p-value
+
+2017
+
+
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa2017) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2017",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2017) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2017",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+2018
+
+
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa2018) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2018",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2018) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2018",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+2019
+
+
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa2019) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2019",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2019) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2019",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+2020
+
+
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa2020) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2020",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2020) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2020",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+2021
+
+
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa2021) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2021",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2021) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2021",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+2022
+
+
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa2022) +
+  tm_fill("ii") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "local Moran's I 2022",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(lisa2022) +
+  tm_fill("p_ii",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of local Moran's I 2022",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+### Plotting LISA map
+
+
+```{r}
+lisa_sig2017 <- lisa2017  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2017) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2017) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2018 <- lisa2018  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2018) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2018) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2019 <- lisa2019  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2019) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2019) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+
+lisa_sig2020 <- lisa2020  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2020) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2020) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2021 <- lisa2021  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2021) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2021) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+
+lisa_sig2022 <- lisa2022  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa2022) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig2022) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+## Hot Spot and Cold Spot Area Analysis
+
+2017
+
+
+```{r}
+wm_idw2017 <- Drug2017 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+
+2018
+
+
+```{r}
+wm_idw2018 <- Drug2018 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+
+2019
+
+
+```{r}
+wm_idw2019 <- Drug2019 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+
+2020
+
+
+```{r}
+wm_idw2020 <- Drug2020 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+
+2021
+
+
+```{r}
+wm_idw2021 <- Drug2021 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+
+2022
+
+
+```{r}
+wm_idw2022 <- Drug2022 %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+
+
+### Computing local Gi\* statistics
+
+
+```{r}
+HCSA2017 <- wm_idw2017 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2017
+```
+
+
+2018
+
+
+```{r}
+HCSA2018 <- wm_idw2018 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2018
+```
+
+
+2019
+
+
+```{r}
+HCSA2019 <- wm_idw2019 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2019
+```
+
+
+2020
+
+
+```{r}
+HCSA2020 <- wm_idw2020 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2020
+```
+
+
+2021
+
+
+```{r}
+HCSA2021 <- wm_idw2021 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2021
+```
+
+
+2022
+
+
+```{r}
+HCSA2022 <- wm_idw2022 %>% 
+  mutate(local_Gi = local_gstar_perm(
+    Total, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA2022
+```
+
+
+### Visualising hot spot and cold spot areas
+
+2017
+
+
+```{r}
+HCSA_sig2017 <- HCSA2017  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2017) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2017) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+2018
+
+
+```{r}
+HCSA_sig2018 <- HCSA2018  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2017) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2018) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+2019
+
+
+```{r}
+HCSA_sig2019 <- HCSA2019  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2019) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2019) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+2020
+
+
+```{r}
+HCSA_sig2020 <- HCSA2020  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2020) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2020) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+2021
+
+
+```{r}
+HCSA_sig2021 <- HCSA2021  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2021) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2021) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+2022
+
+
+```{r}
+HCSA_sig2022 <- HCSA2022  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA2022) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig2022) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
+
+
+## Analysis
+
+Drug trends from 2017 to 2022 Spatial autocorrelation: from 2017 to 2020, statistic shows a yearly increasing trend, which suggests a stronger spatial clustering of the distribution of drug cases over this period. High Moran's I values imply that drug cases may be more concentrated in certain areas.(e.g. areas close to the Golden Triangle) Changes in 2021 and 2022 Declining Moran's I values: in 2021 and 2022, while Moran's I values still exhibit spatial autocorrelation, they decline compared to previous years.This is analyzed below: 1 Impact of drug legalization Legalization of Medical Marijuana: In 2021, Thailand became the first country in Southeast Asia to legalize medical marijuana. The implementation of this policy may have changed public attitudes towards drugs and reduced the demand for other illegal drugs. Legalization may entice some consumers to turn to legalized marijuana products, reducing demand for traditional drugs (e.g., heroin, methamphetamine, etc.). 2. Impact of the epidemic COVID-19 Epidemic: Social closures and travel restrictions during an epidemic may lead to a decrease in the drug trade, particularly a slowdown in international drug smuggling. Closed social environments and economic pressures may have prompted some populations to reduce their use of drugs.
+
