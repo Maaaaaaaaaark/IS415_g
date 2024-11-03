@@ -1,5 +1,5 @@
 ---
-title: "Take-home_Ex10"
+title: "Take-home_Ex03"
 author: "Yuheng Liang"
 format: html
 editor: visual
@@ -35,6 +35,7 @@ pacman::p_load(sf, raster, spatstat, tmap, tidyverse,sparr,spNetwork,dplyr,anima
 ```
 
 ### data
+
 ```{r}
 drug_case <- read_csv("data/2016-01-01-2024-06-30-Philippines.csv")%>%
     st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
@@ -63,10 +64,10 @@ transform the crs
 ph_sf = st_transform(ph_sf,crs = 32651)
 st_crs(ph_sf)
 ```
+
 ```{r}
 ph_sf_owin <-as.owin(ph_sf)
 ```
-
 
 show the point
 
@@ -79,11 +80,11 @@ tm_shape(drug_case)+tm_dots()
 tmap_mode('plot')
 ```
 
-
 ```{r}
 hist(drug_case$year)
 hist(drug_case$event_month)
 ```
+
 ```{r}
 drug_case$fatalities <- as.numeric(drug_case$fatalities)
 
@@ -107,6 +108,7 @@ cases_by_month <- drug_case %>%
 # 打印结果
 print(cases_by_month)
 ```
+
 ```{r}
 
 cases_by_quarter <- drug_case %>%
@@ -128,9 +130,10 @@ ggplot(cases_by_quarter, aes(x = event_quarter, y = case_count)) +
   labs(title = "case by q", x = "q", y = "num") +
   theme_minimal()
 ```
-Excluding the third and fourth quarters of 2016 and the first two or three quarters of 2017 and the first two or two quarters of 2021 the distribution of the other years is fairly even not described as seasonal
-## Spatial Point Analysis by year
-Screening of drug use data for each year
+
+Excluding the third and fourth quarters of 2016 and the first two or three quarters of 2017 and the first two or two quarters of 2021 the distribution of the other years is fairly even not described as seasonal \## Spatial Point Analysis by year Screening of drug use data for each year
+
+## Spatio-Temporal Point Pattern Analysis by year
 ```{r}
 drug_case_2016 <- drug_case %>%
   filter(year== 2016)
@@ -153,6 +156,7 @@ drug_case_2024 <- drug_case %>%
 ```
 
 transform them into ppp objects.
+
 ```{r}
 drug_case_2016_ppp <- as.ppp(drug_case_2016)
 drug_case_2017_ppp <- as.ppp(drug_case_2017)
@@ -164,6 +168,7 @@ drug_case_2022_ppp <- as.ppp(drug_case_2022)
 drug_case_2023_ppp <- as.ppp(drug_case_2023)
 drug_case_2024_ppp <- as.ppp(drug_case_2024)
 ```
+
 ```{r}
 drug_case_2016_ppp <- drug_case_2016_ppp[ph_sf_owin]
 drug_case_2017_ppp <- drug_case_2017_ppp[ph_sf_owin]
@@ -177,6 +182,7 @@ drug_case_2024_ppp <- drug_case_2024_ppp[ph_sf_owin]
 ```
 
 re-scale them to km
+
 ```{r}
 drug_case_2016_ppp.km <- rescale.ppp(drug_case_2016_ppp, 1000, "km")
 drug_case_2017_ppp.km <- rescale.ppp(drug_case_2017_ppp, 1000, "km")
@@ -190,9 +196,28 @@ drug_case_2024_ppp.km <- rescale.ppp(drug_case_2024_ppp, 1000, "km")
 ```
 
 drug_case_2016_ppp_owin.csr <- envelope(drug_case_2016_ppp.km, Gest, nsim = 99)
+drug_case_2017_ppp_owin.csr <- envelope(drug_case_2017_ppp.km, Gest, nsim = 99)
+drug_case_2018_ppp_owin.csr <- envelope(drug_case_2018_ppp.km, Gest, nsim = 99)
+drug_case_2019_ppp_owin.csr <- envelope(drug_case_2019_ppp.km, Gest, nsim = 99)
+drug_case_2020_ppp_owin.csr <- envelope(drug_case_2020_ppp.km, Gest, nsim = 99)
+drug_case_2021_ppp_owin.csr <- envelope(drug_case_2021_ppp.km, Gest, nsim = 99)
+drug_case_2022_ppp_owin.csr <- envelope(drug_case_2022_ppp.km, Gest, nsim = 99)
+drug_case_2023_ppp_owin.csr <- envelope(drug_case_2023_ppp.km, Gest, nsim = 99)
+drug_case_2024_ppp_owin.csr <- envelope(drug_case_2024_ppp.km, Gest, nsim = 99)
+
+plot(drug_case_2016_ppp_owin.csr)
+plot(drug_case_2017_ppp_owin.csr)
+plot(drug_case_2018_ppp_owin.csr)
+plot(drug_case_2019_ppp_owin.csr)
+plot(drug_case_2020_ppp_owin.csr)
+plot(drug_case_2021_ppp_owin.csr)
+plot(drug_case_2022_ppp_owin.csr)
+plot(drug_case_2023_ppp_owin.csr)
+plot(drug_case_2024_ppp_owin.csr)
 
 ## Spatio-Temporal Point Pattern Analysis by quarter
-Filtering data
+
+
 ```{r}
 drug_case_2016_q1 <- drug_case %>%
   filter(year== 2016,event_quarter == 20161)
@@ -225,7 +250,6 @@ drug_case_2018_q3 <- drug_case %>%
 drug_case_2018_q4 <- drug_case %>%
   filter(year== 2018,event_quarter == 20184)
 ```
-
 
 ```{r}
 drug_case_2019_q1 <- drug_case %>%
@@ -378,14 +402,12 @@ drug_case_2019_ppp3_owin <- drug_case_2019_ppp3[ph_sf_owin]
 drug_case_2019_ppp4_owin <- drug_case_2019_ppp4[ph_sf_owin]
 ```
 
-
 ```{r}
 drug_case_2020_ppp1_owin <- drug_case_2020_ppp1[ph_sf_owin]
 drug_case_2020_ppp2_owin <- drug_case_2020_ppp2[ph_sf_owin]
 drug_case_2020_ppp3_owin <- drug_case_2020_ppp3[ph_sf_owin]
 drug_case_2020_ppp4_owin <- drug_case_2020_ppp4[ph_sf_owin]
 ```
-
 
 ```{R}
 drug_case_2021_ppp1_owin <- drug_case_2021_ppp1[ph_sf_owin]
@@ -474,11 +496,52 @@ drug_case_2024_ppp1.km <- rescale.ppp(drug_case_2024_ppp1_owin, 1000, "km")
 drug_case_2024_ppp2.km <- rescale.ppp(drug_case_2024_ppp2_owin, 1000, "km")
 ```
 
-drug_case_2016_ppp1.km.csr <- envelope(drug_case_2016_ppp1.km, Gest, nsim = 99)
-##  Spatio-Temporal Point Pattern Analysis by month
 
-##  Spatio-Temporal Point Pattern Analysis by types
+drug_case_2016_ppp1.km.csr <- envelope(drug_case_2016_ppp1.km, Gest, nsim = 99)
+drug_case_2016_ppp2.km.csr <- envelope(drug_case_2016_ppp1.km, Gest, nsim = 99)
+drug_case_2016_ppp3.km.csr <- envelope(drug_case_2016_ppp1.km, Gest, nsim = 99)
+drug_case_2016_ppp4.km.csr <- envelope(drug_case_2016_ppp1.km, Gest, nsim = 99)
+drug_case_2017_ppp1.km.csr <- envelope(drug_case_2017_ppp1.km, Gest, nsim = 99)
+drug_case_2018_ppp2.km.csr <- envelope(drug_case_2018_ppp1.km, Gest, nsim = 99)
+drug_case_2019_ppp3.km.csr <- envelope(drug_case_2019_ppp1.km, Gest, nsim = 99)
+drug_case_2020_ppp4.km.csr <- envelope(drug_case_2020_ppp1.km, Gest, nsim = 99)
+drug_case_2021_ppp1.km.csr <- envelope(drug_case_2021_ppp1.km, Gest, nsim = 99)
+drug_case_2022_ppp1.km.csr <- envelope(drug_case_2022_ppp1.km, Gest, nsim = 99)
+drug_case_2023_ppp1.km.csr <- envelope(drug_case_2023_ppp1.km, Gest, nsim = 99)
+drug_case_2024_ppp1.km.csr <- envelope(drug_case_2024_ppp1.km, Gest, nsim = 99)
+
+plot(drug_case_2016_ppp1.km.csr)
+
+
+## Spatio-Temporal Point Pattern Analysis by month
+```{r}
+drug_case_2016_1 <- drug_case %>%
+  filter(year== 2016, event_month == 201601)
+```
+
+transform them into ppp objects.
+```{r}
+drug_case_2016_1_ppp <- as.ppp(drug_case_2016_1)
+```
+
+combine
+```{r}
+drug_case_2016_1_ppp <- drug_case_2016_1_ppp[ph_sf_owin]
+```
+
+```{r}
+drug_case_2016_1_ppp.km <- rescale.ppp(drug_case_2016_1_ppp, 1000, "km")
+```
+
+drug_case_2016_ppp_owin.csr <- envelope(drug_case_2016_ppp.km, Gest, nsim = 99)
+plot(drug_case_2016_ppp_owin.csr)
 Filtering data
+
+
+## Spatio-Temporal Point Pattern Analysis by types
+
+Filtering data
+
 ```{r}
 Violence_against_civilians <- drug_case%>%
   filter(event_type == "Violence against civilians")
@@ -488,8 +551,11 @@ Battles <- drug_case%>%
   filter(event_type == "Battles")
 ```
 
+
 ### Violence against civilians by year
+
 Filtering data
+
 ```{r}
 Violence_16 = Violence_against_civilians %>% 
   filter(year == 2016) %>% 
@@ -547,7 +613,9 @@ Violence_24_ppp = Violence_24_ppp[ph_sf_owin]
 Violence_16_ppp.csr = envelope(Violence_16_ppp, Gest, nsim = 99)
 
 ### Battles
+
 Filtering data
+
 ```{r}
 Battles_16 = Battles %>% 
   filter(year == 2016) %>% 
@@ -605,6 +673,7 @@ Battles_24_ppp = Battles_24_ppp[ph_sf_owin]
 Battles_16_ppp.csr = envelope(Battles_16_ppp, Gest, nsim = 99)
 
 ### Strategic developments
+
 ```{r}
 Strategic_developments_16 = Strategic_developments %>% 
   filter(year == 2016) %>% 
