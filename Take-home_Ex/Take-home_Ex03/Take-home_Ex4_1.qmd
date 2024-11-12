@@ -1,0 +1,195 @@
+---
+title: "Take-home_Ex03"
+author: "Yuheng Liang"
+format: html
+editor: visual
+date: "Oct 28, 2024"
+date-modified: "Oct 28, 2024"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+#Take-home_Ex03
+
+## package
+
+```{r}
+pacman::p_load(sf, raster, spatstat, tmap, tidyverse,sparr,spNetwork,dplyr,animation,stringr)
+```
+
+## data
+
+```{r}
+drug_case <- read_csv("data/2016-01-01-2024-06-30-Philippines.csv")%>%
+    st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+    st_transform(crs = 32651) %>%
+  mutate(event_date = dmy(event_date)) %>%
+  mutate(event_month = year*100 + month(event_date)) %>%
+  mutate(event_quarter = year*10 + quarter(event_date))%>%
+  mutate(quarter = as.numeric(str_sub(event_quarter, 5, 5)))
+```
+
+```{r}
+ph_sf = st_read(dsn = "data/phl_adm_psa_namria_20231106_shp",layer = "phl_admbnda_adm2_psa_namria_20231106")
+```
+
+## 1st Order Spatial Point Patterns Analysis Methods（take 2016 whole year Manila as example）
+
+### filte the data and year
+
+```{r}
+Manila_sf = ph_sf %>% filter(str_detect(ADM2_EN, "^Metropolitan Manila"))
+```
+
+```{r}
+drug_case_2016 <- drug_case%>%
+  filter(year== 2016)
+```
+
+```{r}
+drug_Manila_2016 = drug_case_2016 %>% filter(str_detect(admin2, "^Metropolitan Manila"))
+```
+
+### Converting sf data frames to sp’s Spatial\* class
+
+```{r}
+drug_Manila_2016_sf <- as_Spatial(drug_Manila_2016)
+```
+
+```{r}
+drug_Manila_2016
+```
+
+### Converting the Spatial\* class into generic sp format
+
+```{R}
+drug_Manila_2016_ppp <- as.ppp(drug_Manila_2016)
+drug_Manila_2016_ppp
+```
+
+```{r}
+plot(drug_Manila_2016_ppp)
+```
+
+### Creating owin object
+
+```{r}
+Manila_sf = st_transform(Manila_sf,crs = 32651)
+st_crs(Manila_sf)
+```
+
+```{r}
+Manila_owin <- as.owin(Manila_sf)
+```
+
+```{R}
+plot(Manila_owin)
+```
+
+### Combining point events object and owin object
+
+```{r}
+drugManila_ppp = drug_Manila_2016_ppp[Manila_owin]
+```
+
+### First-order Spatial Point Patterns Analysis
+
+```{R}
+kde_childcareSG_bw <- density(drugManila_ppp,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                            kernel="gaussian")
+```
+
+```{r}
+plot(kde_childcareSG_bw)
+```
+
+```{R}
+drugManila_ppp.km <- rescale.ppp(drugManila_ppp, 1000, "km")
+```
+
+### Working with different automatic badwidth methods
+
+```{r}
+kde_drugManila.ppl <- density(drugManila_ppp.km, 
+                               sigma=bw.ppl, 
+                               edge=TRUE,
+                               kernel="gaussian")
+plot(kde_drugManila.ppl, main = "bw.ppl")
+```
+
+### working with different method
+
+```{R}
+par(mfrow=c(2,2))
+plot(density(drugManila_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"), 
+     main="Gaussian")
+plot(density(drugManila_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="epanechnikov"), 
+     main="Epanechnikov")
+plot(density(drugManila_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="quartic"), 
+     main="Quartic")
+plot(density(drugManila_ppp.km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="disc"), 
+     main="Disc")
+```
+
+## 2nd Order Spatial Point Patterns Analysis Methods
+
+### G-function
+
+```{R}
+G_CK = Gest(drugManila_ppp, correction = "border")
+plot(G_CK, xlim=c(0,5))
+```
+
+```{R}
+G_CK.csr <- envelope(drugManila_ppp, Gest, nsim = 999)
+```
+
+```{R}
+plot(G_CK.csr, xlim=c(0,5))
+```
+
+### F-function
+
+```{R}
+F_CK.csr <- envelope(drugManila_ppp, Fest, nsim = 999)
+```
+
+```{R}
+plot(F_CK.csr)
+```
+
+## ShinyApp Storyboard
+
+In my part, I did three main things to analyze the case of drugs according to chronological order, 1st Order Spatial Point Patterns Analysis Methods and Spatio-Temporal Point Pattern Analysis \### GeoVisualisation In this section, the first thing I did was GeoVisualisation, and on shiny I set it up so that I could freely adjust the different dates according to the year and different months, making it easy for users to compare and view.
+
+### Time Series Analysis
+
+In the Time Series Analysis module, the user can choose to view a quarterly or monthly histogram of the number of cases in the drop-down menu. Currently the Histogram tab shows the Annual Case Frequency Histogram, click on the Time Series Plot to view specific tabs according to the user's needs.
+
+### 1st Order Spatial Point Patterns Analysis Methods
+
+-   This page shows the “First-order Analysis” module in the user's Shiny application, which is used to analyze drug abuse data in the Philippines for the period 2016-2024. On the left side of the page, there are two checkboxes for selecting the year,area and function of the analysis, and a “Run First-order Analysis” button for performing the analysis.
+
+-   The graph on the right shows the results of the analysis, presented as a density map generated by Kernel Density Estimation (KDE), showing the spatial density distribution of drug abuse incidents in different regions. The color gradient from blue to yellow indicates the level of density, with the closer the color is to yellow the higher the density. This map helps to identify geographically high incidence areas of drug abuse incidents.
+
+-   By selecting different years and quarters, users can analyze the data spatially and temporally to observe the changes in the spatial distribution of drug abuse incidents over a specific time period.
+
+### Spatio-Temporal Point Pattern Analysis
+
+The Second-order Analysis page allows you to select a year,area and function, and you can choose a specific time period to analyze in order to target a certain period of drug abuse. Meanwhile, the page provides different analysis functions, such as the G function, so that you can choose the appropriate function to analyze according to the purpose of the study. Click on the “Run Second-order Analysis” button to start the selected analysis.(The images below are not yet counted to show the corresponding images)

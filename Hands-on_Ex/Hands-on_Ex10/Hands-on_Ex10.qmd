@@ -41,7 +41,9 @@ test_data <- testing(resale_split)
 write_rds(train_data,"data/train_data.rds")
 write_rds(test_data,"data/test_data.rds")
 ```
+
 ## 3.0 Computing Correlation Matrix
+
 ```{r}
 mdata_nogeo <-mdata%>%
   st_drop_geometry()
@@ -53,15 +55,18 @@ corrplot::corrplot(cor(mdata_nogeo[,2:17]),
                    method = "number",
                    type = "upper")
 ```
+
 The correlation matrix above shows that all the correlation values are below 0.8. Hence, there is no sign of multicolinearity.
 
 ## 4.0 Retriving the Stored Data
+
 ```{r}
 train_data <- read_rds("data/train_data.rds")
 test_data <- read_rds("data/test_data.rds")
 ```
 
 ## 5.0 Building a non-spatial multiple linear regression
+
 ```{r}
 price_mlr <- lm(resale_price ~ floor_area_sqm +
                   storey_order + remaining_lease_mths +
@@ -73,11 +78,15 @@ price_mlr <- lm(resale_price ~ floor_area_sqm +
                 data=train_data)
 summary(price_mlr)
 ```
+
 ```{r}
 write_rds(price_mlr,"data/price_mlr.rds")
 ```
+
 ## 6.0 Preparing coordinates data
+
 ### Extracting coordinates data
+
 ```{r}
 coords <- st_coordinates(mdata)
 coords_train <- st_coordinates(train_data)
@@ -90,12 +99,14 @@ coords_test <- write_rds(coords_test, "data/coords_test.rds" )
 ```
 
 ### Droping geometry field
+
 ```{r}
 train_data <- train_data%>%
   st_drop_geometry()
 ```
 
 ## 7.0 Calibrating Random Forest Model
+
 ```{r}
 set.seed(1234)
 rf <- ranger(resale_price ~ floor_area_sqm + storey_order + 
@@ -107,6 +118,7 @@ rf <- ranger(resale_price ~ floor_area_sqm + storey_order +
              data=train_data)
 rf
 ```
+
 ```{R}
 write_rds(rf,"data/rf.rds")
 ```
@@ -114,8 +126,11 @@ write_rds(rf,"data/rf.rds")
 ```{r}
 rf
 ```
+
 ## 8.0 Calibrating Geographical Random Forest Model
+
 ### Calibrating using training data
+
 ```{r}
 set.seed(1234)
 gwRF_adaptive <- grf(formula = resale_price ~ floor_area_sqm + storey_order +
@@ -135,14 +150,20 @@ write_rds(gwRF_adaptive, "data/gwRF_adaptive.rds")
 ```
 
 ### Predicting by using test data
+
 #### Preparing the test data
+
 combine the test data with its corresponding coordinates data.
+
 ```{r}
 test_data <- cbind(test_data,coords_test)%>%
   st_drop_geometry()
 ```
+
 #### Predicting with test data
+
 predict the resale value by using the test data and gwRF_adaptive model calibrated earlier.
+
 ```{r}
 gwRF_pred <- predict.grf(gwRF_adaptive,
                          test_data,
@@ -151,17 +172,24 @@ gwRF_pred <- predict.grf(gwRF_adaptive,
                          local.w = 1,
                          global.w = 0)
 ```
- save the output into rds file for future use
+
+save the output into rds file for future use
+
 ```{r}
 GRF_pred <- write_rds(gwRF_pred, "data/GRF_pred.rds")
 ```
+
 #### Converting the predicting output into a data frame
+
 The output of the predict.grf() is a vector of predicted values. It is wiser to convert it into a data frame for further visualisation and analysis.
+
 ```{R}
 GRF_pred <- read_rds("data/GRF_pred.rds")
 GRF_pred_df <- as.data.frame(GRF_pred)
 ```
+
 cbind() is used to append the predicted values onto test_datathe
+
 ```{r}
 test_data_p <- cbind(test_data,GRF_pred_df)
 ```
@@ -169,11 +197,15 @@ test_data_p <- cbind(test_data,GRF_pred_df)
 ```{r}
 write_rds(test_data_p, "data/test_data_p.rds")
 ```
+
 #### Calculating Root Mean Square Error
+
 ```{r}
 rmse(test_data_p$resale_price,test_data_p$GRF_pred)
 ```
+
 #### Visualising the predicted values
+
 ```{r}
 ggplot(data = test_data_p,
        aes(x=GRF_pred,
