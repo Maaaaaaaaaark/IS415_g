@@ -229,7 +229,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex03/Take-home_Ex4_1.html">
- <span class="dropdown-text">Take-home Exercise 03</span></a>
+ <span class="dropdown-text">Take-home Exercise 03_2</span></a>
   </li>  
     </ul>
   </li>
@@ -275,10 +275,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#nd-order-spatial-point-patterns-analysis-methods" id="toc-nd-order-spatial-point-patterns-analysis-methods" class="nav-link" data-scroll-target="#nd-order-spatial-point-patterns-analysis-methods">2nd Order Spatial Point Patterns Analysis Methods</a>
   <ul class="collapse">
   <li><a href="#g-function" id="toc-g-function" class="nav-link" data-scroll-target="#g-function">G-function</a></li>
-  <li><a href="#f-function" id="toc-f-function" class="nav-link" data-scroll-target="#f-function">F-function</a></li>
+  <li><a href="#l-function" id="toc-l-function" class="nav-link" data-scroll-target="#l-function">L-function</a></li>
+  <li><a href="#k-function" id="toc-k-function" class="nav-link" data-scroll-target="#k-function">K-function</a></li>
   </ul></li>
   <li><a href="#shinyapp-storyboard" id="toc-shinyapp-storyboard" class="nav-link" data-scroll-target="#shinyapp-storyboard">ShinyApp Storyboard</a>
   <ul class="collapse">
+  <li><a href="#geovisualisation" id="toc-geovisualisation" class="nav-link" data-scroll-target="#geovisualisation">GeoVisualisation</a></li>
   <li><a href="#time-series-analysis" id="toc-time-series-analysis" class="nav-link" data-scroll-target="#time-series-analysis">Time Series Analysis</a></li>
   <li><a href="#st-order-spatial-point-patterns-analysis-methods" id="toc-st-order-spatial-point-patterns-analysis-methods" class="nav-link" data-scroll-target="#st-order-spatial-point-patterns-analysis-methods">1st Order Spatial Point Patterns Analysis Methods</a></li>
   <li><a href="#spatio-temporal-point-pattern-analysis" id="toc-spatio-temporal-point-pattern-analysis" class="nav-link" data-scroll-target="#spatio-temporal-point-pattern-analysis">Spatio-Temporal Point Pattern Analysis</a></li>
@@ -355,7 +357,40 @@ dbl  (8): year, time_precision, iso, latitude, longitude, geo_precision, fat...
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ph_sf <span class="ot">=</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/phl_adm_psa_namria_20231106_shp"</span>,<span class="at">layer =</span> <span class="st">"phl_admbnda_adm2_psa_namria_20231106"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(drug_case,<span class="st">"data/drug_case.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 按省份和年份分组并统计案例数量</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>summary_data <span class="ot">&lt;-</span> drug_case <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(admin2, year) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_cases =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="co"># 统计每组的行数</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看结果</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(summary_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 435 features and 3 fields
+Geometry type: GEOMETRY
+Dimension:     XY
+Bounding box:  xmin: -128531.7 ymin: 518340.4 xmax: 864960.5 ymax: 2055587
+Projected CRS: WGS 84 / UTM zone 51N
+# A tibble: 435 × 4
+   admin2            year total_cases                                   geometry
+   &lt;chr&gt;            &lt;dbl&gt;       &lt;int&gt;                             &lt;GEOMETRY [m]&gt;
+ 1 Abra              2016           6 MULTIPOINT ((243552.1 1949406), (247247.5…
+ 2 Abra              2017           2 MULTIPOINT ((246789.8 1947649), (259088.9…
+ 3 Abra              2019           1                   POINT (248189.3 1945782)
+ 4 Abra              2020           1                   POINT (249952.6 1952636)
+ 5 Abra              2024           2 MULTIPOINT ((246603.5 1948039), (248189.3…
+ 6 Agusan del Norte  2016          17 MULTIPOINT ((754728.1 990125.8), (757148.…
+ 7 Agusan del Norte  2017           1                  POINT (779704.2 990191.1)
+ 8 Agusan del Norte  2021           1                  POINT (779704.2 990191.1)
+ 9 Agusan del Norte  2022           2                  POINT (779704.2 990191.1)
+10 Agusan del Norte  2024           1                  POINT (779704.2 990191.1)
+# ℹ 425 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ph_sf <span class="ot">=</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/phl_adm_psa_namria_20231106_shp"</span>,<span class="at">layer =</span> <span class="st">"phl_admbnda_adm2_psa_namria_20231106"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `phl_admbnda_adm2_psa_namria_20231106' from data source 
   `/Users/liangyuhang/Downloads/Maaaaaaaaaark/IS415_g/Take-home_Ex/Take-home_Ex03/data/phl_adm_psa_namria_20231106_shp' 
@@ -373,23 +408,27 @@ Geodetic CRS:  WGS 84</code></pre>
 <section id="filte-the-data-and-year" class="level3">
 <h3 class="anchored" data-anchor-id="filte-the-data-and-year">filte the data and year</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Manila_sf <span class="ot">=</span> ph_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(ADM2_EN, <span class="st">"^Metropolitan Manila"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Manila_sf <span class="ot">=</span> ph_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(ADM2_EN, <span class="st">"^Metropolitan Manila"</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>Bulacan_sf <span class="ot">=</span> ph_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(ADM2_EN,<span class="st">"^Bulacan"</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>Cebu_sf <span class="ot">=</span> ph_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(ADM2_EN, <span class="st">"^Cebu"</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>Laguna_sf <span class="ot">=</span> ph_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(ADM2_EN, <span class="st">"^Laguna"</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>Pangasinan_sf <span class="ot">=</span> ph_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(ADM2_EN, <span class="st">"^Pangasinan"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>drug_case_2016 <span class="ot">&lt;-</span> drug_case<span class="sc">%&gt;%</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year<span class="sc">==</span> <span class="dv">2016</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>drug_case_2016 <span class="ot">&lt;-</span> drug_case<span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year<span class="sc">==</span> <span class="dv">2016</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016 <span class="ot">=</span> drug_case_2016 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(admin2, <span class="st">"^Metropolitan Manila"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016 <span class="ot">=</span> drug_case_2016 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">str_detect</span>(admin2, <span class="st">"^Metropolitan Manila"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="converting-sf-data-frames-to-sps-spatial-class" class="level3">
 <h3 class="anchored" data-anchor-id="converting-sf-data-frames-to-sps-spatial-class">Converting sf data frames to sp’s Spatial* class</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016_sf <span class="ot">&lt;-</span> <span class="fu">as_Spatial</span>(drug_Manila_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016_sf <span class="ot">&lt;-</span> <span class="fu">as_Spatial</span>(drug_Manila_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Simple feature collection with 783 features and 32 fields
 Geometry type: POINT
@@ -422,12 +461,12 @@ Projected CRS: WGS 84 / UTM zone 51N
 <section id="converting-the-spatial-class-into-generic-sp-format" class="level3">
 <h3 class="anchored" data-anchor-id="converting-the-spatial-class-into-generic-sp-format">Converting the Spatial* class into generic sp format</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(drug_Manila_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(drug_Manila_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in as.ppp.sf(drug_Manila_2016): only first attribute column is used for
 marks</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016_ppp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>drug_Manila_2016_ppp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Marked planar point pattern: 783 points
 marks are of storage type  'character'
@@ -435,7 +474,7 @@ window: rectangle = [279767.7, 296805.51] x [1593737.4, 1623565.7] units</code><
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(drug_Manila_2016_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(drug_Manila_2016_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in default.charmap(ntypes, chars): Too many types to display every type
 as a different character</code></pre>
@@ -446,7 +485,7 @@ as a different character</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -455,90 +494,28 @@ as a different character</code></pre>
 <section id="creating-owin-object" class="level3">
 <h3 class="anchored" data-anchor-id="creating-owin-object">Creating owin object</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Manila_sf <span class="ot">=</span> <span class="fu">st_transform</span>(Manila_sf,<span class="at">crs =</span> <span class="dv">32651</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(Manila_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Coordinate Reference System:
-  User input: EPSG:32651 
-  wkt:
-PROJCRS["WGS 84 / UTM zone 51N",
-    BASEGEOGCRS["WGS 84",
-        ENSEMBLE["World Geodetic System 1984 ensemble",
-            MEMBER["World Geodetic System 1984 (Transit)"],
-            MEMBER["World Geodetic System 1984 (G730)"],
-            MEMBER["World Geodetic System 1984 (G873)"],
-            MEMBER["World Geodetic System 1984 (G1150)"],
-            MEMBER["World Geodetic System 1984 (G1674)"],
-            MEMBER["World Geodetic System 1984 (G1762)"],
-            MEMBER["World Geodetic System 1984 (G2139)"],
-            ELLIPSOID["WGS 84",6378137,298.257223563,
-                LENGTHUNIT["metre",1]],
-            ENSEMBLEACCURACY[2.0]],
-        PRIMEM["Greenwich",0,
-            ANGLEUNIT["degree",0.0174532925199433]],
-        ID["EPSG",4326]],
-    CONVERSION["UTM zone 51N",
-        METHOD["Transverse Mercator",
-            ID["EPSG",9807]],
-        PARAMETER["Latitude of natural origin",0,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8801]],
-        PARAMETER["Longitude of natural origin",123,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8802]],
-        PARAMETER["Scale factor at natural origin",0.9996,
-            SCALEUNIT["unity",1],
-            ID["EPSG",8805]],
-        PARAMETER["False easting",500000,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8806]],
-        PARAMETER["False northing",0,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8807]]],
-    CS[Cartesian,2],
-        AXIS["(E)",east,
-            ORDER[1],
-            LENGTHUNIT["metre",1]],
-        AXIS["(N)",north,
-            ORDER[2],
-            LENGTHUNIT["metre",1]],
-    USAGE[
-        SCOPE["Engineering survey, topographic mapping."],
-        AREA["Between 120°E and 126°E, northern hemisphere between equator and 84°N, onshore and offshore. China. Indonesia. Japan. North Korea. Philippines. Russian Federation. South Korea. Taiwan."],
-        BBOX[0,120,84,126]],
-    ID["EPSG",32651]]</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>Manila_sf <span class="ot">=</span> <span class="fu">st_transform</span>(Manila_sf,<span class="at">crs =</span> <span class="dv">32651</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>Bulacan_sf <span class="ot">=</span> <span class="fu">st_transform</span>(Bulacan_sf,<span class="at">crs =</span> <span class="dv">32651</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>Pangasinan_sf <span class="ot">=</span> <span class="fu">st_transform</span>(Pangasinan_sf,<span class="at">crs =</span> <span class="dv">32651</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>Cebu_sf <span class="ot">=</span> <span class="fu">st_transform</span>(Cebu_sf,<span class="at">crs =</span> <span class="dv">32651</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>Laguna_sf <span class="ot">=</span> <span class="fu">st_transform</span>(Laguna_sf,<span class="at">crs =</span> <span class="dv">32651</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>Manila_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(Manila_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Manila_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(Manila_sf)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>Bulacan_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(Bulacan_sf)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>Pangasinan_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(Pangasinan_sf)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>Cebu_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(Cebu_sf)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>Laguna_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(Laguna_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Manila_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="combining-point-events-object-and-owin-object" class="level3">
-<h3 class="anchored" data-anchor-id="combining-point-events-object-and-owin-object">Combining point events object and owin object</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>drugManila_ppp <span class="ot">=</span> drug_Manila_2016_ppp[Manila_owin]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="first-order-spatial-point-patterns-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="first-order-spatial-point-patterns-analysis">First-order Spatial Point Patterns Analysis</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_bw <span class="ot">&lt;-</span> <span class="fu">density</span>(drugManila_ppp,</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.diggle,</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(Manila_owin,<span class="st">"data/owin/Manila_owin.rds"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(Bulacan_owin,<span class="st">"data/owin/Bulacan_owin.rds"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(Pangasinan_owin,<span class="st">"data/owin/Pangasinan_owin.rds"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(Cebu_owin,<span class="st">"data/owin/Cebu_owin.rds"</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(Laguna_owin,<span class="st">"data/owin/Laguna_owin.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_childcareSG_bw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Manila_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -547,27 +524,52 @@ PROJCRS["WGS 84 / UTM zone 51N",
 </div>
 </div>
 </div>
+</section>
+<section id="combining-point-events-object-and-owin-object" class="level3">
+<h3 class="anchored" data-anchor-id="combining-point-events-object-and-owin-object">Combining point events object and owin object</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>drugManila_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(drugManila_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>drugManila_ppp <span class="ot">=</span> drug_Manila_2016_ppp[Manila_owin]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="first-order-spatial-point-patterns-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="first-order-spatial-point-patterns-analysis">First-order Spatial Point Patterns Analysis</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_bw <span class="ot">&lt;-</span> <span class="fu">density</span>(drugManila_ppp,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.diggle,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_childcareSG_bw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>drugManila_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(drugManila_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="working-with-different-automatic-badwidth-methods" class="level3">
 <h3 class="anchored" data-anchor-id="working-with-different-automatic-badwidth-methods">Working with different automatic badwidth methods</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>kde_drugManila.ppl <span class="ot">&lt;-</span> <span class="fu">density</span>(drugManila_ppp.km, </span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">sigma=</span>bw.ppl, </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">kernel=</span><span class="st">"gaussian"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>kde_drugManila.ppl <span class="ot">&lt;-</span> <span class="fu">density</span>(drugManila_ppp.km, </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">sigma=</span>bw.ppl, </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">kernel=</span><span class="st">"gaussian"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Likelihood Cross-Validation criterion was maximised at left-hand end
 of interval [0.807, 24.4]; use argument 'srange' to specify a wider interval
 for bandwidth 'sigma'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_drugManila.ppl, <span class="at">main =</span> <span class="st">"bw.ppl"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_drugManila.ppl, <span class="at">main =</span> <span class="st">"bw.ppl"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -576,22 +578,22 @@ for bandwidth 'sigma'</code></pre>
 <section id="working-with-different-method" class="level3">
 <h3 class="anchored" data-anchor-id="working-with-different-method">working with different method</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"gaussian"</span>), </span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Gaussian"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"gaussian"</span>), </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Gaussian"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Likelihood Cross-Validation criterion was maximised at left-hand end
 of interval [0.807, 24.4]; use argument 'srange' to specify a wider interval
 for bandwidth 'sigma'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"epanechnikov"</span>), </span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Epanechnikov"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"epanechnikov"</span>), </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Epanechnikov"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in density.ppp(drugManila_ppp.km, sigma = bw.ppl, edge = TRUE, kernel =
 "epanechnikov"): Bandwidth selection will be based on Gaussian kernel
@@ -600,11 +602,11 @@ Warning in density.ppp(drugManila_ppp.km, sigma = bw.ppl, edge = TRUE, kernel =
 left-hand end of interval [0.807, 24.4]; use argument 'srange' to specify a
 wider interval for bandwidth 'sigma'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"quartic"</span>), </span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Quartic"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"quartic"</span>), </span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Quartic"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in density.ppp(drugManila_ppp.km, sigma = bw.ppl, edge = TRUE, kernel =
 "quartic"): Bandwidth selection will be based on Gaussian kernel
@@ -613,11 +615,11 @@ Warning in density.ppp(drugManila_ppp.km, sigma = bw.ppl, edge = TRUE, kernel =
 end of interval [0.807, 24.4]; use argument 'srange' to specify a wider
 interval for bandwidth 'sigma'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"disc"</span>), </span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Disc"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(drugManila_ppp.km, </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma=</span>bw.ppl, </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge=</span><span class="cn">TRUE</span>, </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"disc"</span>), </span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main=</span><span class="st">"Disc"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in density.ppp(drugManila_ppp.km, sigma = bw.ppl, edge = TRUE, kernel =
 "disc"): Bandwidth selection will be based on Gaussian kernel
@@ -629,7 +631,7 @@ for bandwidth 'sigma'</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -641,18 +643,18 @@ for bandwidth 'sigma'</code></pre>
 <section id="g-function" class="level3">
 <h3 class="anchored" data-anchor-id="g-function">G-function</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>G_CK <span class="ot">=</span> <span class="fu">Gest</span>(drugManila_ppp, <span class="at">correction =</span> <span class="st">"border"</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>G_CK <span class="ot">=</span> <span class="fu">Gest</span>(drugManila_ppp, <span class="at">correction =</span> <span class="st">"border"</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>G_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(drugManila_ppp, Gest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>G_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(drugManila_ppp, Gest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 999 simulations of CSR  ...
 1, 2, 3, ......10.........20.........30.........40.........50.........60..
@@ -676,20 +678,74 @@ Done.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK.csr, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK.csr, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="f-function" class="level3">
-<h3 class="anchored" data-anchor-id="f-function">F-function</h3>
+<section id="l-function" class="level3">
+<h3 class="anchored" data-anchor-id="l-function">L-function</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>F_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(drugManila_ppp, Fest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>F_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(drugManila_ppp, Lest, <span class="at">nsim =</span> <span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 9 simulations of CSR  ...
+1, 2,  [2:53 remaining] 3,
+ [2:29 remaining] 4,  [2:07 remaining] 5,  [1:41 remaining] 6,
+ [1:15 remaining] 7,  [50 sec remaining] 8,  [25 sec remaining] 
+9.
+
+Done.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>L_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(drugManila_ppp, Lest, <span class="at">nsim =</span> <span class="dv">9</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 9 simulations of CSR  ...
+1, 2,  [3:08 remaining] 3,
+ [2:50 remaining] 4,  [2:20 remaining] 5,  [1:54 remaining] 6,
+ [1:25 remaining] 7,  [56 sec remaining] 8,  [28 sec remaining] 
+9.
+
+Done.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>write_rds </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (x, file, compress = c("none", "gz", "bz2", "xz"), version = 2, 
+    refhook = NULL, text = FALSE, path = deprecated(), ...) 
+{
+    if (is_present(path)) {
+        deprecate_warn("1.4.0", "write_rds(path = )", "write_rds(file = )")
+        file &lt;- path
+    }
+    compress &lt;- match.arg(compress)
+    con &lt;- switch(compress, none = file(file, ...), gz = gzfile(file, 
+        ...), bz2 = bzfile(file, ...), xz = xzfile(file, ...))
+    on.exit(close(con), add = TRUE)
+    saveRDS(x, con, version = version, refhook = refhook, ascii = text)
+    invisible(x)
+}
+&lt;bytecode: 0x160e36750&gt;
+&lt;environment: namespace:readr&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(F_CK.csr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="k-function" class="level3">
+<h3 class="anchored" data-anchor-id="k-function">K-function</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>G_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(drugManila_ppp, Gest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 999 simulations of CSR  ...
 1, 2, 3, ......10.........20.........30.........40.........50.........60..
@@ -710,23 +766,17 @@ Done.</code></pre>
 999.
 
 Done.</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(F_CK.csr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex4_1_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
 </div>
 </div>
 </section>
 </section>
 <section id="shinyapp-storyboard" class="level2">
 <h2 class="anchored" data-anchor-id="shinyapp-storyboard">ShinyApp Storyboard</h2>
-<p>In my part, I did three main things to analyze the case of drugs according to chronological order, 1st Order Spatial Point Patterns Analysis Methods and Spatio-Temporal Point Pattern Analysis ### GeoVisualisation In this section, the first thing I did was GeoVisualisation, and on shiny I set it up so that I could freely adjust the different dates according to the year and different months, making it easy for users to compare and view.</p>
+<p>In my part, I did three main things to analyze the case of drugs according to chronological order, 1st Order Spatial Point Patterns Analysis Methods and Spatio-Temporal Point Pattern Analysis</p>
+<section id="geovisualisation" class="level3">
+<h3 class="anchored" data-anchor-id="geovisualisation">GeoVisualisation</h3>
+<p>In this section, the first thing I did was GeoVisualisation, and on shiny I set it up so that I could freely adjust the different dates according to the year and different months, making it easy for users to compare and view.</p>
+</section>
 <section id="time-series-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="time-series-analysis">Time Series Analysis</h3>
 <p>In the Time Series Analysis module, the user can choose to view a quarterly or monthly histogram of the number of cases in the drop-down menu. Currently the Histogram tab shows the Annual Case Frequency Histogram, click on the Time Series Plot to view specific tabs according to the user’s needs.</p>

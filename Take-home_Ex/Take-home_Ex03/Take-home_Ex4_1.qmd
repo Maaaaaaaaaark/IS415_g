@@ -30,6 +30,21 @@ drug_case <- read_csv("data/2016-01-01-2024-06-30-Philippines.csv")%>%
   mutate(event_quarter = year*10 + quarter(event_date))%>%
   mutate(quarter = as.numeric(str_sub(event_quarter, 5, 5)))
 ```
+```{r}
+write_rds(drug_case,"data/drug_case.rds")
+```
+
+
+```{r}
+# 按省份和年份分组并统计案例数量
+summary_data <- drug_case %>%
+  group_by(admin2, year) %>%
+  summarise(total_cases = n(), .groups = "drop") # 统计每组的行数
+
+# 查看结果
+print(summary_data)
+```
+
 
 ```{r}
 ph_sf = st_read(dsn = "data/phl_adm_psa_namria_20231106_shp",layer = "phl_admbnda_adm2_psa_namria_20231106")
@@ -41,6 +56,10 @@ ph_sf = st_read(dsn = "data/phl_adm_psa_namria_20231106_shp",layer = "phl_admbnd
 
 ```{r}
 Manila_sf = ph_sf %>% filter(str_detect(ADM2_EN, "^Metropolitan Manila"))
+Bulacan_sf = ph_sf %>% filter(str_detect(ADM2_EN,"^Bulacan"))
+Cebu_sf = ph_sf %>% filter(str_detect(ADM2_EN, "^Cebu"))
+Laguna_sf = ph_sf %>% filter(str_detect(ADM2_EN, "^Laguna"))
+Pangasinan_sf = ph_sf %>% filter(str_detect(ADM2_EN, "^Pangasinan"))
 ```
 
 ```{r}
@@ -77,12 +96,28 @@ plot(drug_Manila_2016_ppp)
 
 ```{r}
 Manila_sf = st_transform(Manila_sf,crs = 32651)
-st_crs(Manila_sf)
+Bulacan_sf = st_transform(Bulacan_sf,crs = 32651)
+Pangasinan_sf = st_transform(Pangasinan_sf,crs = 32651)
+Cebu_sf = st_transform(Cebu_sf,crs = 32651)
+Laguna_sf = st_transform(Laguna_sf,crs = 32651)
 ```
 
 ```{r}
 Manila_owin <- as.owin(Manila_sf)
+Bulacan_owin <- as.owin(Bulacan_sf)
+Pangasinan_owin <- as.owin(Pangasinan_sf)
+Cebu_owin <- as.owin(Cebu_sf)
+Laguna_owin <- as.owin(Laguna_sf)
 ```
+
+```{r}
+write_rds(Manila_owin,"data/owin/Manila_owin.rds")
+write_rds(Bulacan_owin,"data/owin/Bulacan_owin.rds")
+write_rds(Pangasinan_owin,"data/owin/Pangasinan_owin.rds")
+write_rds(Cebu_owin,"data/owin/Cebu_owin.rds")
+write_rds(Laguna_owin,"data/owin/Laguna_owin.rds")
+```
+
 
 ```{R}
 plot(Manila_owin)
@@ -164,19 +199,30 @@ G_CK.csr <- envelope(drugManila_ppp, Gest, nsim = 999)
 plot(G_CK.csr, xlim=c(0,5))
 ```
 
-### F-function
+### L-function
 
 ```{R}
-F_CK.csr <- envelope(drugManila_ppp, Fest, nsim = 999)
+F_CK.csr <- envelope(drugManila_ppp, Lest, nsim = 9)
+L_ck.csr <- envelope(drugManila_ppp, Lest, nsim = 9, rank = 1, glocal=TRUE)
+write_rds 
 ```
 
 ```{R}
 plot(F_CK.csr)
 ```
 
+### K-function
+```{r}
+G_CK.csr <- envelope(drugManila_ppp, Gest, nsim = 999)
+```
+
+
 ## ShinyApp Storyboard
 
-In my part, I did three main things to analyze the case of drugs according to chronological order, 1st Order Spatial Point Patterns Analysis Methods and Spatio-Temporal Point Pattern Analysis \### GeoVisualisation In this section, the first thing I did was GeoVisualisation, and on shiny I set it up so that I could freely adjust the different dates according to the year and different months, making it easy for users to compare and view.
+In my part, I did three main things to analyze the case of drugs according to chronological order, 1st Order Spatial Point Patterns Analysis Methods and Spatio-Temporal Point Pattern Analysis 
+
+### GeoVisualisation 
+In this section, the first thing I did was GeoVisualisation, and on shiny I set it up so that I could freely adjust the different dates according to the year and different months, making it easy for users to compare and view.
 
 ### Time Series Analysis
 
